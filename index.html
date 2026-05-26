@@ -702,14 +702,7 @@ function applySearch(query, resetIndex) {
   searchInfo.textContent = `0 / ${state.searchHits.length}`;
 
   if (resetIndex && state.searchHits.length > 0) {
-    // jump to nearest hit to current scroll position
-    const viewMid = prompter.scrollTop + prompter.clientHeight / 2;
-    let best = 0, bestDist = Infinity;
-    state.searchHits.forEach((el, i) => {
-      const dist = Math.abs(el.offsetTop - viewMid);
-      if (dist < bestDist) { bestDist = dist; best = i; }
-    });
-    jumpToHit(best);
+    jumpToHit(0); // 항상 첫 번째 결과로 이동
   }
 }
 
@@ -838,7 +831,45 @@ async function readDocx(file) {
   const arrayBuffer = await file.arrayBuffer();
   const result = await mammoth.extractRawText({ arrayBuffer });
   if (!result.value) throw new Error('텍스트를 추출할 수 없습니다');
-  return result.value;
+  return formatScript(result.value);
+}
+
+function formatScript(raw) {
+  // 단락 구분 키워드: 오프닝, 작품설명, 엔딩 / [챕터 숫자]
+  const SECTION_RE = /^(오프닝|작품설명|엔딩)$/;
+  const CHAPTER_RE = /^\[(챕터|작품)\s*\S*\]/;
+
+  const lines = raw.split(/\r?\n/);
+  const result = [];
+  let prevWasContent = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    // 빈 줄 → 무시
+    if (!line) continue;
+
+    const isSection = SECTION_RE.test(line);
+    const isChapter = CHAPTER_RE.test(line);
+
+    if (isSection || isChapter) {
+      // 단락 구분: 앞에 빈 줄 추가 (결과가 비어있지 않을 때만)
+      if (result.length > 0) result.push('');
+      result.push(line);
+      prevWasContent = false;
+    } else {
+      // 일반 본문: 이어붙이기 (줄바꿈 제거)
+      if (prevWasContent) {
+        // 직전 줄에 이어붙임
+        result[result.length - 1] += ' ' + line;
+      } else {
+        result.push(line);
+        prevWasContent = true;
+      }
+    }
+  }
+
+  return result.join('\n');
 }
 </script>
 </body>
