@@ -2,528 +2,734 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>신촌연합교회 주일예배일지</title>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, orderBy, query }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  const firebaseConfig = {
-    apiKey: "AIzaSyA5N3_4rGrlMsjTfebPv7XHwlrXnPDmT38",
-    authDomain: "suc-journal.firebaseapp.com",
-    projectId: "suc-journal",
-    storageBucket: "suc-journal.firebasestorage.app",
-    messagingSenderId: "191671853524",
-    appId: "1:191671853524:web:55806820f5346da886f641"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  window._db = db;
-  window._col = collection(db, "records");
-  window._fns = { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, orderBy, query };
-  window._dbReady = true;
-  document.dispatchEvent(new Event('db-ready'));
-</script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>프롬프터</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'맑은 고딕','Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0f2f5;color:#111;}
-#app{max-width:860px;margin:0 auto;padding:14px;}
-.tabs{display:flex;gap:8px;margin-bottom:14px;}
-.tab-btn{flex:1;padding:10px;border:none;border-radius:8px;background:#fff;color:#555;font-size:14px;cursor:pointer;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.1);transition:all .2s;}
-.tab-btn.active{background:#1a3a5c;color:#fff;}
-.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:14px;}
-.card h2{font-size:17px;font-weight:800;margin-bottom:16px;color:#1a202c;border-bottom:2px solid #1a3a5c;padding-bottom:9px;}
-.sec{font-size:11px;font-weight:800;color:#1a3a5c;margin:18px 0 9px;letter-spacing:.5px;}
-.part-sel{display:flex;gap:8px;margin-bottom:4px;}
-.part-btn{flex:1;padding:9px;border:2px solid #ddd;border-radius:8px;background:#fff;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;}
-.part-btn.active{border-color:#1a3a5c;background:#1a3a5c;color:#fff;}
-.row{display:flex;gap:10px;margin-bottom:9px;flex-wrap:wrap;}
-.fg{display:flex;flex-direction:column;gap:3px;flex:1;min-width:130px;}
-.fg label{font-size:11px;color:#666;font-weight:700;}
-.fg input,.fg textarea{border:1px solid #ddd;border-radius:6px;padding:7px 9px;font-size:13px;font-family:inherit;background:#fafafa;transition:border .2s;}
-.fg input:focus,.fg textarea:focus{outline:none;border-color:#1a3a5c;background:#fff;}
-.fg textarea{resize:none;min-height:80px;overflow:hidden;}
-.fixed{background:#eef2ff!important;color:#1a3a5c;font-weight:700;}
-.sum-box{background:#eef2ff;border-radius:8px;padding:11px 14px;font-size:13px;font-weight:700;color:#1a3a5c;margin-top:4px;}
-.act-row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
-.btn{padding:10px 18px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;}
-.btn:hover{opacity:.85;}
-.btn-primary{background:#1a3a5c;color:#fff;flex:1;}
-.btn-sub{background:#e2e8f0;color:#333;}
-.btn-print{background:#d1fae5;color:#065f46;}
-.btn-danger{background:#fee2e2;color:#991b1b;}
-.btn-edit{background:#fef9c3;color:#78350f;}
-.btn-back{background:#e2e8f0;color:#333;}
-.list-empty{padding:40px;text-align:center;color:#aaa;font-size:14px;}
-.list-item{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background .15s;}
-.list-item:hover{background:#f7faff;}
-.list-item:last-child{border-bottom:none;}
-.li-title{font-weight:700;font-size:14px;color:#1a202c;}
-.li-meta{font-size:11px;color:#888;margin-top:2px;}
-.li-arr{color:#ccc;font-size:20px;}
-.loading{padding:40px;text-align:center;color:#888;font-size:14px;}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;}
-.modal-bg.open{display:flex;}
-.modal{background:#fff;border-radius:14px;padding:24px;max-width:460px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2);}
-.modal h3{font-size:16px;font-weight:800;margin-bottom:12px;}
-.modal p{font-size:13px;color:#555;margin-bottom:8px;line-height:1.6;}
-.modal-btns{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
-.modal-btns .btn{flex:1;}
-#print-area{display:none;}
-@media(max-width:600px){.row{flex-direction:column;}.fg{min-width:unset;}}
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap');
 
-/* 양식 공통 (미리보기 + 인쇄 공용) */
-.pf-wrap{width:100%;font-family:'맑은 고딕','Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:13px;color:#000;}
-.pf-title{text-align:center;font-size:18px;font-weight:800;padding:0 0 20px;letter-spacing:1px;}
-.pf-wrap table{width:100%;border-collapse:collapse;table-layout:fixed;}
-.pf-wrap td{font-size:13px;vertical-align:middle;word-break:keep-all;padding:6px 10px;}
-.pf-lbl{background:#e8e8e8;font-weight:700;text-align:center;width:100px;min-width:100px;max-width:100px;white-space:nowrap;overflow:hidden;}
-.pf-val{background:#fff;}
-.t-head{border:1.5px solid #444;}
-.t-head td{border:1px solid #888;}
-.t-body{border:1.5px solid #444;border-top:none;}
-.t-body td{border:1px solid #888;border-top:none;}
-.t-body tr:first-child td{border-top:1px solid #888;}
-.t-att{border:1.5px solid #444;border-top:none;}
-.t-att td{border:1px solid #888;border-top:none;}
-.t-att tr:first-child td{border-top:1px solid #888;}
-.t-tot{border:1.5px solid #444;border-top:none;}
-.t-tot td{border:1px solid #888;border-top:none;}
-.t-tot tr:first-child td{border-top:1px solid #888;}
-.att-val{background:#fff;vertical-align:top!important;padding:9px 12px!important;line-height:1.9;}
-.att-sec{font-weight:700;margin-top:10px;}
-.att-sec:first-child{margin-top:0;}
-.att-names{word-break:keep-all;margin-top:3px;white-space:normal;}
-.tot-val{background:#fff;vertical-align:top!important;padding:8px 12px!important;line-height:2.1;}
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --border: #222;
+    --accent: #e8c96d;
+    --accent2: #6de8c9;
+    --text: #f0f0f0;
+    --muted: #555;
+    --panel-w: 340px;
+    --bar-h: 108px; /* 상단바 고정 높이 (2줄) */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    height: var(--bar-h);
+    min-height: var(--bar-h);
+    max-height: var(--bar-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 12px;
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    white-space: nowrap;
+    min-width: 72px;
+  }
+
+  .ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border-left: 1px solid var(--border);
+    padding-left: 8px;
+  }
+
+  .ctrl-label {
+    font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  .val-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    min-width: 28px;
+    text-align: right;
+  }
+
+  .btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color .15s, color .15s, background .15s;
+    font-family: inherit;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn:hover, .btn:active { border-color: var(--accent); color: var(--accent); }
+  .btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+  #playBtn {
+    font-size: 18px;
+    padding: 6px 14px;
+    border-color: var(--accent2);
+    color: var(--accent2);
+    min-width: 48px;
+  }
+  #playBtn:hover, #playBtn.active { background: var(--accent2); color: #000; border-color: var(--accent2); }
+
+  #boldBtn { font-weight: 700; font-size: 15px; min-width: 36px; }
+
+  /* ── SEARCH BAR ── */
+  #searchBar {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    background: #0f0f0f;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  #searchBar.open { display: flex; }
+
+  #searchInput {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 15px;
+    padding: 7px 12px;
+    outline: none;
+    font-family: inherit;
+    min-height: 38px;
+  }
+  #searchInput:focus { border-color: var(--accent2); }
+
+  #searchInfo {
+    font-size: 12px;
+    color: var(--muted);
+    min-width: 56px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── MAIN ── */
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* ── SCRIPT PANEL ── */
+  #scriptPanel {
+    width: var(--panel-w);
+    min-width: 220px;
+    background: #0d0d0d;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  #scriptPanel.hidden { display: none; }
+
+  .panel-title {
+    padding: 8px 12px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  #uploadArea {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+  #uploadArea .btn { width: 100%; font-size: 13px; min-height: 40px; }
+  #uploadStatus {
+    font-size: 11px;
+    color: var(--accent2);
+    min-height: 14px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  #uploadStatus.err { color: #e86d6d; }
+
+  /* 스크립트 직접 편집 textarea */
+  #scriptInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.8;
+    padding: 12px;
+    resize: none;
+    outline: none;
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 0;
+  }
+
+  /* ── RESIZE HANDLE ── */
+  #resizeHandle {
+    width: 6px;
+    cursor: col-resize;
+    background: transparent;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+    touch-action: none;
+  }
+  #resizeHandle:hover, #resizeHandle.dragging { background: var(--accent); opacity: .4; }
+
+  /* ── PROMPTER ── */
+  #prompterWrap {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: var(--bg);
+    min-width: 0;
+  }
+
+  #prompter {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    padding: 60px 0;
+    scrollbar-width: none;
+  }
+  #prompter::-webkit-scrollbar { display: none; }
+
+  #prompterContent {
+    margin: 0 auto;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  body.mirror #prompterContent { transform: scaleX(-1); }
+
+  #prompterContent mark.hit {
+    background: rgba(232,201,109,.25);
+    color: var(--accent);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+  #prompterContent mark.hit.current {
+    background: var(--accent);
+    color: #000;
+  }
+
+  #posBar {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--border);
+  }
+  #posThumb {
+    width: 4px;
+    background: var(--accent);
+    border-radius: 2px;
+    position: absolute;
+    top: 0;
+    transition: top .1s;
+    min-height: 24px;
+  }
+
+  #speedHud {
+    position: absolute;
+    bottom: 14px;
+    right: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
 </style>
 </head>
 <body>
-<div id="app">
-  <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('write',true)">✏️ 일지 작성</button>
-    <button class="tab-btn" onclick="showTab('list')">📋 저장된 일지</button>
-  </div>
 
-  <div id="tab-write">
-    <div class="card">
-      <h2>주일예배 일지 작성</h2>
-      <div class="sec">예배 순서</div>
-      <div class="part-sel">
-        <button class="part-btn active" onclick="setPart(1)">1부</button>
-        <button class="part-btn" onclick="setPart(2)">2부</button>
-        <button class="part-btn" onclick="setPart(3)">3부</button>
-      </div>
-      <div class="sec">기본 정보</div>
-      <div class="row">
-        <div class="fg"><label>날짜</label><input type="date" id="f-date"></div>
-        <div class="fg"><label>시간</label><input type="time" id="f-time"></div>
-        <div class="fg"><label>작성자</label><input type="text" id="f-writer" placeholder="이름 입력"></div>
-      </div>
-      <div class="sec">예배 내용</div>
-      <div class="row">
-        <div class="fg"><label>예배의 부름</label><input type="text" id="f-call" class="fixed" value="다같이"></div>
-        <div class="fg"><label>신앙고백</label><input type="text" id="f-creed" class="fixed" value="다같이 (사도신경)"></div>
-      </div>
-      <div class="row">
-        <div class="fg"><label>찬양인도</label><input type="text" id="f-praise" placeholder="이름"></div>
-        <div class="fg"><label>반주</label><input type="text" id="f-accompany" class="fixed" value="정은정 집사"></div>
-        <div class="fg"><label>대표기도</label><input type="text" id="f-prayer" placeholder="이름"></div>
-      </div>
-      <div class="row">
-        <div class="fg"><label>말씀</label><input type="text" id="f-word" placeholder="성경 구절"></div>
-        <div class="fg"><label>설교</label><input type="text" id="f-sermon" class="fixed" value="엄태우 목사"></div>
-        <div class="fg"><label>설교주제</label><input type="text" id="f-topic" placeholder="설교 주제"></div>
-      </div>
-      <div class="row">
-        <div class="fg"><label>예물 (헌금 위원)</label><input type="text" id="f-offering" placeholder="이름"></div>
-        <div class="fg"><label>봉헌기도</label><input type="text" id="f-offerpray" class="fixed" value="엄태우 목사"></div>
-        <div class="fg"><label>축복기도</label><input type="text" id="f-bless" class="fixed" value="엄태우 목사"></div>
-      </div>
-      <div class="sec">참석자 명단</div>
-      <div class="row">
-        <div class="fg">
-          <label>현장 참석자 <span id="cnt-on" style="color:#1a3a5c;">(0명)</span></label>
-          <textarea id="f-onsite" placeholder="공백·쉼표·줄바꿈으로 구분&#10;공백 포함 이름은 (홍 길동)처럼 괄호로" oninput="countN();autoResize(this)"></textarea>
-        </div>
-        <div class="fg">
-          <label>온라인 참석자 <span id="cnt-ol" style="color:#1a3a5c;">(0명)</span></label>
-          <textarea id="f-online" placeholder="공백·쉼표·줄바꿈으로 구분" oninput="countN();autoResize(this)"></textarea>
-        </div>
-        <div class="fg">
-          <label>방문자 <span id="cnt-vi" style="color:#1a3a5c;">(0명)</span></label>
-          <textarea id="f-visitor" placeholder="공백·쉼표·줄바꿈으로 구분" oninput="countN();autoResize(this)"></textarea>
-        </div>
-      </div>
-      <div class="sum-box">
-        인원 합계 — 현장: <span id="s-on">0</span>명 &nbsp;/&nbsp; 온라인: <span id="s-ol">0</span>명 &nbsp;/&nbsp; 총: <span id="s-tot">0</span>명
-      </div>
-      <div class="act-row">
-        <button class="btn btn-sub" onclick="resetForm()">초기화</button>
-        <button class="btn btn-primary" onclick="saveRecord()">💾 저장</button>
-        <button class="btn btn-print" onclick="openPrintModal(null)">🖨️ 인쇄/PDF</button>
-      </div>
+<!-- TOP BAR: 2줄 고정 -->
+<div id="topbar">
+  <!-- 1행: 로고 + 슬라이더들 -->
+  <div class="bar-row">
+    <span class="logo">PROMPTER</span>
+
+    <div class="ctrl-group">
+      <span class="ctrl-label">글자</span>
+      <input type="range" id="fontRange" min="18" max="120" value="48" style="width:80px">
+      <span class="val-badge" id="fontVal">48</span>
+    </div>
+
+    <div class="ctrl-group">
+      <span class="ctrl-label">너비</span>
+      <input type="range" id="widthRange" min="30" max="100" value="80" style="width:70px">
+      <span class="val-badge" id="widthVal">80%</span>
+    </div>
+
+    <div class="ctrl-group">
+      <span class="ctrl-label">속도</span>
+      <input type="range" id="speedRange" min="0" max="10" step="0.5" value="2" style="width:70px">
+      <span class="val-badge" id="speedVal">2</span>
+    </div>
+
+    <div class="ctrl-group">
+      <span class="ctrl-label">줄간격</span>
+      <input type="range" id="lineRange" min="1" max="3" step="0.1" value="1.7" style="width:70px">
+      <span class="val-badge" id="lineVal">1.7</span>
+    </div>
+
+    <div class="ctrl-group">
+      <button class="btn" id="boldBtn" title="볼드체">B</button>
     </div>
   </div>
 
-  <div id="tab-list" style="display:none;">
-    <div class="card" style="padding:0;overflow:hidden;" id="list-container">
-      <div class="loading">불러오는 중...</div>
+  <!-- 2행: 액션 버튼들 -->
+  <div class="bar-row">
+    <button class="btn" id="playBtn">▶</button>
+    <button class="btn" id="resetBtn" title="처음으로">↩ 처음</button>
+    <button class="btn" id="searchToggle">🔍 검색</button>
+    <button class="btn" id="mirrorBtn">⇆ 미러</button>
+    <button class="btn" id="panelToggle">📝 스크립트</button>
+  </div>
+</div>
+
+<!-- SEARCH BAR -->
+<div id="searchBar">
+  <input type="text" id="searchInput" placeholder="검색어 입력...">
+  <span id="searchInfo">0 / 0</span>
+  <button class="btn" id="prevHit">▲</button>
+  <button class="btn" id="nextHit">▼</button>
+  <button class="btn" id="closeSearch">✕</button>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <!-- Script panel -->
+  <div id="scriptPanel">
+    <div class="panel-title">스크립트</div>
+    <div id="uploadArea">
+      <input type="file" id="fileInput" accept=".docx,.txt" style="display:none">
+      <button class="btn" id="uploadBtn">📂 파일 불러오기 &nbsp;<span style="color:var(--muted);font-size:10px;">docx · txt</span></button>
+      <div id="uploadStatus"></div>
     </div>
+    <textarea id="scriptInput" placeholder="여기에 스크립트를 직접 입력하거나 파일을 불러오세요."></textarea>
   </div>
 
-  <div id="tab-detail" style="display:none;">
-    <div class="act-row" style="margin-bottom:12px;">
-      <button class="btn btn-back" onclick="showTab('list')">← 목록</button>
-      <button class="btn btn-edit" onclick="editRecord()">✏️ 수정</button>
-      <button class="btn btn-danger" onclick="deleteRecord()">🗑️ 삭제</button>
-      <button class="btn btn-print" onclick="openPrintModal(currentDetailId)">🖨️ 인쇄/PDF</button>
-    </div>
-    <div id="detail-content"></div>
-  </div>
+  <!-- Resize handle -->
+  <div id="resizeHandle"></div>
 
-  <div class="modal-bg" id="print-modal">
-    <div class="modal">
-      <h3>🖨️ 인쇄 / PDF 저장</h3>
-      <p>새 탭에서 양식이 열리고 인쇄 화면이 자동으로 실행됩니다.</p>
-      <p><strong>📱 모바일:</strong> 인쇄 화면에서 <strong>「PDF로 저장」</strong> 선택 후 카카오톡·드롭박스로 공유하세요.</p>
-      <p><strong>💡 팁:</strong> 인쇄 설정에서 <strong>머릿글/바닥글 없음</strong>, <strong>배경 그래픽 포함</strong>을 설정하면 깔끔하게 출력됩니다.</p>
-      <div class="modal-btns">
-        <button class="btn btn-sub" onclick="closePrintModal()">취소</button>
-        <button class="btn btn-primary" onclick="doPrint()">인쇄 화면 열기</button>
-      </div>
+  <!-- Prompter -->
+  <div id="prompterWrap">
+    <div id="prompter">
+      <div id="prompterContent"></div>
     </div>
+    <div id="posBar"><div id="posThumb"></div></div>
+    <div id="speedHud">정지</div>
   </div>
-  <div id="print-area"></div>
 </div>
 
 <script>
-var currentPart = 1;
-var currentDetailId = null;
-var records = [];
-var pendingPrintId = null;
-var partTimes = {1:'09:00', 2:'11:20', 3:'15:30'};
+// ── STATE ──
+const state = {
+  text: `안녕하세요, 여러분.\n\n오늘 발표에 오신 것을 환영합니다.\n\n저는 오늘 우리 팀이 지난 한 달간 준비한 프로젝트에 대해 말씀드리려고 합니다.\n\n먼저 배경 설명부터 시작하겠습니다.\n\n우리가 이 프로젝트를 시작하게 된 이유는 명확합니다.\n\n고객들의 요구사항이 빠르게 변화하고 있으며, 우리는 그에 맞춰 발 빠르게 대응해야 했습니다.\n\n감사합니다.`,
+  fontSize: 48,
+  width: 80,
+  speed: 2,
+  lineHeight: 1.7,
+  bold: false,
+  playing: false,
+  mirror: false,
+  searchHits: [],
+  currentHit: -1,
+  rafId: null,
+  lastTs: null,
+};
 
-function waitDB(fn) {
-  if (window._dbReady) fn();
-  else document.addEventListener('db-ready', fn, {once:true});
+// ── ELEMENTS ──
+const prompter        = document.getElementById('prompter');
+const prompterContent = document.getElementById('prompterContent');
+const scriptInput     = document.getElementById('scriptInput');
+const fontRange       = document.getElementById('fontRange');
+const fontVal         = document.getElementById('fontVal');
+const widthRange      = document.getElementById('widthRange');
+const widthVal        = document.getElementById('widthVal');
+const speedRange      = document.getElementById('speedRange');
+const speedVal        = document.getElementById('speedVal');
+const lineRange       = document.getElementById('lineRange');
+const lineVal         = document.getElementById('lineVal');
+const boldBtn         = document.getElementById('boldBtn');
+const playBtn         = document.getElementById('playBtn');
+const resetBtn        = document.getElementById('resetBtn');
+const mirrorBtn       = document.getElementById('mirrorBtn');
+const panelToggle     = document.getElementById('panelToggle');
+const searchToggle    = document.getElementById('searchToggle');
+const searchBar       = document.getElementById('searchBar');
+const searchInput     = document.getElementById('searchInput');
+const searchInfo      = document.getElementById('searchInfo');
+const prevHit         = document.getElementById('prevHit');
+const nextHit         = document.getElementById('nextHit');
+const closeSearch     = document.getElementById('closeSearch');
+const posThumb        = document.getElementById('posThumb');
+const speedHud        = document.getElementById('speedHud');
+const scriptPanel     = document.getElementById('scriptPanel');
+const resizeHandle    = document.getElementById('resizeHandle');
+
+// ── INIT ──
+scriptInput.value = state.text;
+renderPrompter();
+applyStyles();
+panelToggle.classList.add('active');
+
+// ── RENDER ──
+function renderPrompter(keepRatio) {
+  const ratio = keepRatio !== undefined ? keepRatio : getScrollRatio();
+  prompterContent.innerHTML = escapeAndHighlight(state.text);
+  requestAnimationFrame(() => { setScrollRatio(ratio); updatePosBar(); });
 }
 
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = el.scrollHeight + 'px';
+function escapeAndHighlight(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>');
 }
 
-function init() {
-  setToday();
-  document.getElementById('f-time').value = '09:00';
+function applyStyles(keepRatio) {
+  const ratio = keepRatio !== undefined ? keepRatio : getScrollRatio();
+  prompterContent.style.fontSize   = state.fontSize + 'px';
+  prompterContent.style.width      = state.width + '%';
+  prompterContent.style.lineHeight = state.lineHeight;
+  prompterContent.style.fontWeight = state.bold ? '700' : '400';
+  requestAnimationFrame(() => setScrollRatio(ratio));
 }
 
-function setToday() {
-  var d = new Date();
-  var y = d.getFullYear();
-  var m = String(d.getMonth()+1).padStart(2,'0');
-  var dd = String(d.getDate()).padStart(2,'0');
-  document.getElementById('f-date').value = y+'-'+m+'-'+dd;
+// ── SCROLL ──
+function getScrollRatio() {
+  const max = prompter.scrollHeight - prompter.clientHeight;
+  return max <= 0 ? 0 : prompter.scrollTop / max;
+}
+function setScrollRatio(ratio) {
+  const max = prompter.scrollHeight - prompter.clientHeight;
+  prompter.scrollTop = ratio * max;
+}
+function updatePosBar() {
+  const ratio = getScrollRatio();
+  const barH  = document.getElementById('posBar').clientHeight;
+  const thumbH = Math.max(24, barH * (prompter.clientHeight / prompter.scrollHeight));
+  posThumb.style.height = thumbH + 'px';
+  posThumb.style.top    = (ratio * (barH - thumbH)) + 'px';
+}
+prompter.addEventListener('scroll', updatePosBar);
+
+// ── CONTROLS ──
+fontRange.addEventListener('input', () => {
+  state.fontSize = +fontRange.value; fontVal.textContent = state.fontSize;
+  applyStyles(getScrollRatio());
+});
+widthRange.addEventListener('input', () => {
+  state.width = +widthRange.value; widthVal.textContent = state.width + '%';
+  applyStyles(getScrollRatio());
+});
+speedRange.addEventListener('input', () => {
+  state.speed = +speedRange.value; speedVal.textContent = state.speed;
+  updateSpeedHud();
+});
+lineRange.addEventListener('input', () => {
+  state.lineHeight = +lineRange.value; lineVal.textContent = state.lineHeight.toFixed(1);
+  applyStyles(getScrollRatio());
+});
+boldBtn.addEventListener('click', () => {
+  state.bold = !state.bold;
+  boldBtn.classList.toggle('active', state.bold);
+  applyStyles(getScrollRatio());
+});
+
+// 스크립트 패널 직접 편집 → 즉시 프롬프터 반영
+scriptInput.addEventListener('input', () => {
+  const ratio = getScrollRatio();
+  state.text = scriptInput.value;
+  renderPrompter(ratio);
+});
+
+// ── PLAY ──
+function updateSpeedHud() {
+  speedHud.textContent = state.playing ? `▶ ×${state.speed}` : '정지';
+}
+function togglePlay() {
+  state.playing = !state.playing;
+  playBtn.textContent = state.playing ? '⏸' : '▶';
+  playBtn.classList.toggle('active', state.playing);
+  updateSpeedHud();
+  if (state.playing) { state.lastTs = null; state.rafId = requestAnimationFrame(scrollTick); }
+  else cancelAnimationFrame(state.rafId);
+}
+function scrollTick(ts) {
+  if (!state.lastTs) state.lastTs = ts;
+  const dt = ts - state.lastTs; state.lastTs = ts;
+  prompter.scrollTop += state.speed * dt / 16;
+  updatePosBar();
+  if (prompter.scrollTop >= prompter.scrollHeight - prompter.clientHeight) {
+    state.playing = false; playBtn.textContent = '▶'; playBtn.classList.remove('active'); updateSpeedHud(); return;
+  }
+  state.rafId = requestAnimationFrame(scrollTick);
+}
+playBtn.addEventListener('click', togglePlay);
+resetBtn.addEventListener('click', () => { prompter.scrollTop = 0; updatePosBar(); });
+
+// ── MIRROR ──
+mirrorBtn.addEventListener('click', () => {
+  state.mirror = !state.mirror;
+  document.body.classList.toggle('mirror', state.mirror);
+  mirrorBtn.classList.toggle('active', state.mirror);
+});
+
+// ── PANEL TOGGLE ──
+panelToggle.addEventListener('click', () => {
+  const ratio = getScrollRatio();
+  scriptPanel.classList.toggle('hidden');
+  panelToggle.classList.toggle('active', !scriptPanel.classList.contains('hidden'));
+  requestAnimationFrame(() => setScrollRatio(ratio));
+});
+
+// ── SEARCH ──
+searchToggle.addEventListener('click', openSearch);
+function openSearch() { searchBar.classList.add('open'); searchInput.focus(); searchInput.select(); }
+
+closeSearch.addEventListener('click', () => {
+  searchBar.classList.remove('open');
+  searchInput.value = '';
+  clearHighlights();
+  searchInfo.textContent = '0 / 0';
+  state.searchHits = []; state.currentHit = -1;
+});
+
+searchInput.addEventListener('input', () => applySearch(searchInput.value, true));
+
+function applySearch(query, resetIndex) {
+  clearHighlights();
+  state.searchHits = []; state.currentHit = -1;
+  if (!query) { searchInfo.textContent = '0 / 0'; return; }
+
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escaped})`, 'gi');
+  let idx = 0;
+  prompterContent.innerHTML = escapeAndHighlight(state.text).replace(regex, m =>
+    `<mark class="hit" data-idx="${idx++}">${m}</mark>`
+  );
+  state.searchHits = Array.from(prompterContent.querySelectorAll('mark.hit'));
+  searchInfo.textContent = `0 / ${state.searchHits.length}`;
+  if (resetIndex && state.searchHits.length > 0) jumpToHit(0); // 항상 첫 번째로
 }
 
-function setPart(n) {
-  currentPart = n;
-  document.querySelectorAll('.part-btn').forEach(function(b,i){ b.classList.toggle('active', i===n-1); });
-  document.getElementById('f-time').value = partTimes[n];
+function jumpToHit(i) {
+  if (!state.searchHits.length) return;
+  if (state.currentHit >= 0 && state.currentHit < state.searchHits.length)
+    state.searchHits[state.currentHit].classList.remove('current');
+  state.currentHit = (i + state.searchHits.length) % state.searchHits.length;
+  const el = state.searchHits[state.currentHit];
+  el.classList.add('current');
+  searchInfo.textContent = `${state.currentHit + 1} / ${state.searchHits.length}`;
+  const targetTop = el.offsetTop - prompter.clientHeight / 2 + el.offsetHeight / 2;
+  prompter.scrollTo({ top: targetTop, behavior: 'smooth' });
+  setTimeout(updatePosBar, 350);
 }
+nextHit.addEventListener('click', () => jumpToHit(state.currentHit + 1));
+prevHit.addEventListener('click', () => jumpToHit(state.currentHit - 1));
 
-function parseNames(s) {
-  if (!s || !s.trim()) return [];
-  var bracketed = [];
-  s = s.replace(/\(([^)]+)\)/g, function(_, inner) {
-    bracketed.push(inner.trim());
-    return '__N'+(bracketed.length-1)+'__';
+function clearHighlights() { prompterContent.innerHTML = escapeAndHighlight(state.text); }
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement.tagName;
+  if (tag === 'TEXTAREA' || tag === 'INPUT') {
+    if (e.key === 'Escape') { document.activeElement.blur(); closeSearch.click(); }
+    return;
+  }
+  if (e.ctrlKey && e.key === 'f') { e.preventDefault(); openSearch(); return; }
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); togglePlay(); return; }
+  if (e.key === 'ArrowUp')   prompter.scrollBy({ top: -80, behavior: 'smooth' });
+  if (e.key === 'ArrowDown') prompter.scrollBy({ top:  80, behavior: 'smooth' });
+  if (e.key === 'Escape') closeSearch.click();
+});
+
+// ── RESIZE PANEL (터치 지원) ──
+let resizing = false, startX = 0, startW = 0;
+resizeHandle.addEventListener('mousedown', e => { resizing = true; startX = e.clientX; startW = scriptPanel.offsetWidth; resizeHandle.classList.add('dragging'); });
+resizeHandle.addEventListener('touchstart', e => { resizing = true; startX = e.touches[0].clientX; startW = scriptPanel.offsetWidth; resizeHandle.classList.add('dragging'); }, { passive: true });
+document.addEventListener('mousemove', e => { if (!resizing) return; scriptPanel.style.width = Math.max(180, Math.min(600, startW + e.clientX - startX)) + 'px'; });
+document.addEventListener('touchmove', e => { if (!resizing) return; scriptPanel.style.width = Math.max(180, Math.min(600, startW + e.touches[0].clientX - startX)) + 'px'; }, { passive: true });
+document.addEventListener('mouseup',  () => { resizing = false; resizeHandle.classList.remove('dragging'); });
+document.addEventListener('touchend', () => { resizing = false; resizeHandle.classList.remove('dragging'); });
+
+// ── FILE UPLOAD ──
+const uploadBtn    = document.getElementById('uploadBtn');
+const fileInput    = document.getElementById('fileInput');
+const uploadStatus = document.getElementById('uploadStatus');
+
+uploadBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', async () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+  fileInput.value = '';
+  const ext = file.name.split('.').pop().toLowerCase();
+  uploadStatus.className = '';
+  uploadStatus.textContent = '읽는 중...';
+  try {
+    let text = '';
+    if (ext === 'txt')        text = await readTxt(file);
+    else if (ext === 'docx')  text = await readDocx(file);
+    else throw new Error('docx 또는 txt 파일만 가능합니다');
+    state.text = text.trim();
+    scriptInput.value = state.text;
+    renderPrompter(0);
+    uploadStatus.textContent = '✓ ' + file.name;
+    setTimeout(() => { uploadStatus.textContent = ''; }, 3000);
+  } catch (e) {
+    uploadStatus.className = 'err';
+    uploadStatus.textContent = '⚠ ' + e.message;
+  }
+});
+
+function readTxt(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.onerror = () => reject(new Error('파일을 읽을 수 없습니다'));
+    r.readAsText(file, 'UTF-8');
   });
-  return s.split(/[\s,\n]+/).map(function(x){ return x.trim(); }).filter(function(x){ return x.length > 0; }).map(function(x) {
-    var m = x.match(/^__N(\d+)__$/);
-    return m ? bracketed[parseInt(m[1])] : x;
-  });
 }
 
-function countN() {
-  var on = parseNames(document.getElementById('f-onsite').value);
-  var ol = parseNames(document.getElementById('f-online').value);
-  var vi = parseNames(document.getElementById('f-visitor').value);
-  document.getElementById('cnt-on').textContent = '('+on.length+'명)';
-  document.getElementById('cnt-ol').textContent = '('+ol.length+'명)';
-  document.getElementById('cnt-vi').textContent = '('+vi.length+'명)';
-  document.getElementById('s-on').textContent = on.length+vi.length;
-  document.getElementById('s-ol').textContent = ol.length;
-  document.getElementById('s-tot').textContent = on.length+ol.length+vi.length;
-}
-
-function showTab(t, fromTab) {
-  ['write','list','detail'].forEach(function(id) {
-    document.getElementById('tab-'+id).style.display = id===t ? 'block' : 'none';
-  });
-  document.querySelectorAll('.tab-btn').forEach(function(b,i) {
-    b.classList.toggle('active', (i===0&&t==='write')||(i===1&&(t==='list'||t==='detail')));
-  });
-  if (t === 'list') renderList();
-  if (t === 'write' && fromTab) resetForm();
-}
-
-function collectForm() {
-  return {
-    part: currentPart,
-    date: document.getElementById('f-date').value,
-    time: document.getElementById('f-time').value,
-    writer: document.getElementById('f-writer').value,
-    call: document.getElementById('f-call').value,
-    creed: document.getElementById('f-creed').value,
-    praise: document.getElementById('f-praise').value,
-    accompany: document.getElementById('f-accompany').value,
-    prayer: document.getElementById('f-prayer').value,
-    word: document.getElementById('f-word').value,
-    sermon: document.getElementById('f-sermon').value,
-    topic: document.getElementById('f-topic').value,
-    offering: document.getElementById('f-offering').value,
-    offerpray: document.getElementById('f-offerpray').value,
-    bless: document.getElementById('f-bless').value,
-    onsite: parseNames(document.getElementById('f-onsite').value),
-    online: parseNames(document.getElementById('f-online').value),
-    visitor: parseNames(document.getElementById('f-visitor').value),
-    createdAt: Date.now()
-  };
-}
-
-function fillForm(r) {
-  setPart(r.part);
-  ['date','time','writer','call','creed','praise','accompany','prayer','word','sermon','topic','offering','offerpray','bless'].forEach(function(k) {
-    var el = document.getElementById('f-'+k);
-    if (el) el.value = r[k] || '';
-  });
-  document.getElementById('f-onsite').value = (r.onsite||[]).join(' ');
-  document.getElementById('f-online').value = (r.online||[]).join(' ');
-  document.getElementById('f-visitor').value = (r.visitor||[]).join(' ');
-  countN();
-  ['f-onsite','f-online','f-visitor'].forEach(function(id) {
-    autoResize(document.getElementById(id));
-  });
-}
-
-function resetForm() {
-  document.querySelectorAll('#tab-write input,#tab-write textarea').forEach(function(el) {
-    if (!el.classList.contains('fixed')) el.value = '';
-  });
-  document.getElementById('f-call').value = '다같이';
-  document.getElementById('f-creed').value = '다같이 (사도신경)';
-  document.getElementById('f-accompany').value = '정은정 집사';
-  document.getElementById('f-sermon').value = '엄태우 목사';
-  document.getElementById('f-offerpray').value = '엄태우 목사';
-  document.getElementById('f-bless').value = '엄태우 목사';
-  currentDetailId = null;
-  setToday();
-  setPart(1);
-  countN();
-  ['f-onsite','f-online','f-visitor'].forEach(function(id) {
-    var el = document.getElementById(id);
-    el.style.height = 'auto';
-  });
-}
-
-function saveRecord() {
-  var r = collectForm();
-  if (!r.date) { alert('날짜를 입력해주세요.'); return; }
-  waitDB(function() {
-    if (currentDetailId) {
-      var ex = records.find(function(x){ return x._id === currentDetailId; });
-      if (ex) r.createdAt = ex.createdAt;
-      window._fns.updateDoc(window._fns.doc(window._db,'records',currentDetailId), r).then(function() {
-        currentDetailId = null;
-        alert('수정되었습니다!');
-        showTab('list');
-      }).catch(function(e){ alert('저장 실패: '+e.message); });
-    } else {
-      window._fns.addDoc(window._col, r).then(function() {
-        alert('저장되었습니다!');
-        showTab('list');
-      }).catch(function(e){ alert('저장 실패: '+e.message); });
-    }
-  });
-}
-
-function loadRecords() {
-  return new Promise(function(resolve) {
-    waitDB(function() {
-      var q = window._fns.query(window._col, window._fns.orderBy('createdAt','asc'));
-      window._fns.getDocs(q).then(function(snap) {
-        var recs = snap.docs.map(function(d){ return Object.assign({}, d.data(), {_id:d.id}); });
-        recs.sort(function(a,b){
-          if (b.date !== a.date) return b.date.localeCompare(a.date);
-          return (a.part||1)-(b.part||1);
-        });
-        records = recs;
-        resolve(records);
-      }).catch(function(e){ console.error(e); records=[]; resolve([]); });
+async function readDocx(file) {
+  if (!window.mammoth) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+      s.onload = resolve;
+      s.onerror = () => reject(new Error('라이브러리 로드 실패 (인터넷 연결 확인)'));
+      document.head.appendChild(s);
     });
-  });
-}
-
-function deleteRecord() {
-  if (!confirm('삭제하시겠습니까?')) return;
-  waitDB(function() {
-    window._fns.deleteDoc(window._fns.doc(window._db,'records',currentDetailId)).then(function() {
-      currentDetailId = null;
-      showTab('list');
-    }).catch(function(e){ alert('삭제 실패: '+e.message); });
-  });
-}
-
-function fmtDate(d) {
-  if (!d) return '';
-  var parts = d.split('-');
-  return parts[0]+'년 '+parts[1]+'월 '+parts[2]+'일';
-}
-
-function renderList() {
-  var c = document.getElementById('list-container');
-  c.innerHTML = '<div class="loading">불러오는 중...</div>';
-  loadRecords().then(function() {
-    if (!records.length) { c.innerHTML='<div class="list-empty">저장된 일지가 없습니다.</div>'; return; }
-    c.innerHTML = records.map(function(r) {
-      return '<div class="list-item" onclick="openDetail(\''+r._id+'\')">'
-        +'<div>'
-        +'<div class="li-title">신촌연합교회 주일예배일지 ('+r.part+'부)</div>'
-        +'<div class="li-meta">'+fmtDate(r.date)+' · 작성자: '+(r.writer||'-')+' · 현장 '+((r.onsite||[]).length+(r.visitor||[]).length)+'명 / 온라인 '+(r.online||[]).length+'명</div>'
-        +'</div>'
-        +'<div class="li-arr">›</div>'
-        +'</div>';
-    }).join('');
-  });
-}
-
-function openDetail(id) {
-  currentDetailId = id;
-  var r = records.find(function(x){ return x._id===id; });
-  if (!r) return;
-  document.getElementById('detail-content').innerHTML = buildPF(r);
-  showTab('detail');
-}
-
-function editRecord() {
-  var r = records.find(function(x){ return x._id===currentDetailId; });
-  if (!r) return;
-  fillForm(r);
-  showTab('write');
-}
-
-function openPrintModal(id) { pendingPrintId=id; document.getElementById('print-modal').classList.add('open'); }
-function closePrintModal() { document.getElementById('print-modal').classList.remove('open'); }
-
-function doPrint() {
-  closePrintModal();
-  var r = pendingPrintId===null ? collectForm() : records.find(function(x){ return x._id===pendingPrintId; });
-  if (!r) return;
-  var html = buildPageHTML(r);
-  var blob = new Blob([html], {type:'text/html;charset=utf-8'});
-  var url = URL.createObjectURL(blob);
-  var win = window.open(url, '_blank');
-  if (!win) alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해주세요.');
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 15000);
-}
-
-function chunkNames(arr) {
-  return arr.join('  ');
-}
-
-function buildPF(r) {
-  var on = r.onsite||[], ol = r.online||[], vi = r.visitor||[];
-  var totOn = on.length+vi.length, totOl = ol.length, tot = totOn+totOl;
-  var dateStr = '년    월    일', timeStr = '';
-  if (r.date) {
-    var dp = r.date.split('-');
-    dateStr = dp[0]+'년 '+parseInt(dp[1])+'월 '+parseInt(dp[2])+'일';
   }
-  if (r.time) {
-    var tp = r.time.split(':');
-    var h = parseInt(tp[0]), m = tp[1];
-    var ap = h<12?'오전':'오후';
-    var hh = h===0?12:h>12?h-12:h;
-    timeStr = ' '+ap+' '+hh+'시'+(m!=='00'?' '+m+'분':'');
+  const arrayBuffer = await file.arrayBuffer();
+  const htmlResult  = await mammoth.convertToHtml({ arrayBuffer });
+  if (!htmlResult.value) throw new Error('텍스트를 추출할 수 없습니다');
+  return parseDocxHtml(htmlResult.value);
+}
+
+function parseDocxHtml(html) {
+  const SECTION_RE = /^(오프닝|작품설명|엔딩)$/;
+  const BREAK_RE   = /^\[(챕터|작품)\s*\S*\]$/;
+
+  const parser = new DOMParser();
+  const doc    = parser.parseFromString(html, 'text/html');
+  const result = [];
+
+  const tables = doc.querySelectorAll('table');
+  if (tables.length > 0) {
+    tables.forEach(table => {
+      table.querySelectorAll('tr').forEach(row => {
+        const cells     = row.querySelectorAll('td, th');
+        if (!cells.length) return;
+        const leftText  = cells[0] ? cells[0].innerText.trim() : '';
+        const rightText = cells[1] ? cells[1].innerText.trim() : '';
+        const isSection = SECTION_RE.test(leftText);
+        const isBreak   = BREAK_RE.test(leftText);
+        if (isSection || isBreak) {
+          if (result.length > 0) { result.push(''); result.push(''); }
+          result.push(leftText);
+          if (rightText) result.push(collapseLines(rightText));
+        } else {
+          const content = rightText || leftText;
+          if (content) result.push(collapseLines(content));
+        }
+      });
+    });
+  } else {
+    const paras = doc.querySelectorAll('p');
+    let bodyLines = [];
+    paras.forEach(p => {
+      const text = p.innerText.trim();
+      if (!text) return;
+      if (SECTION_RE.test(text) || BREAK_RE.test(text)) {
+        if (bodyLines.length) { result.push(bodyLines.join(' ')); bodyLines = []; }
+        if (result.length) { result.push(''); result.push(''); }
+        result.push(text);
+      } else {
+        bodyLines.push(text);
+      }
+    });
+    if (bodyLines.length) result.push(bodyLines.join(' '));
   }
-  var onsiteStr  = chunkNames(on, 9);
-  var onlineStr  = chunkNames(ol, 9);
-  var visitorStr = chunkNames(vi, 9);
-
-  return '<div class="pf-wrap">'
-    +'<div class="pf-title">신촌연합교회 주일예배일지 ('+r.part+'부)</div>'
-    +'<table class="t-head"><colgroup><col style="width:100px"><col><col style="width:60px"><col style="width:110px"></colgroup>'
-    +'<tr><td class="pf-lbl">일시</td><td class="pf-val">'+dateStr+timeStr+'</td>'
-    +'<td class="pf-lbl">작성자</td><td class="pf-val">'+(r.writer||'')+'</td></tr></table>'
-    +'<table class="t-body"><colgroup><col style="width:100px"><col></colgroup>'
-    +'<tr><td class="pf-lbl">예배의 부름</td><td class="pf-val">'+(r.call||'다같이')+'</td></tr>'
-    +'<tr><td class="pf-lbl">신앙고백</td><td class="pf-val">'+(r.creed||'다같이 (사도신경)')+'</td></tr>'
-    +'<tr><td class="pf-lbl">찬양인도</td><td class="pf-val">'+(r.praise||'')+'</td></tr>'
-    +'<tr><td class="pf-lbl">반주</td><td class="pf-val">'+(r.accompany||'정은정 집사')+'</td></tr>'
-    +'<tr><td class="pf-lbl">대표기도</td><td class="pf-val">'+(r.prayer||'')+'</td></tr>'
-    +'<tr><td class="pf-lbl">말씀</td><td class="pf-val">'+(r.word||'')+'</td></tr>'
-    +'<tr><td class="pf-lbl">설교</td><td class="pf-val">'+(r.sermon||'엄태우 목사')+'</td></tr>'
-    +'<tr><td class="pf-lbl">설교주제</td><td class="pf-val">'+(r.topic||'')+'</td></tr>'
-    +'<tr><td class="pf-lbl">예물</td><td class="pf-val">'+(r.offering||'')+'</td></tr>'
-    +'<tr><td class="pf-lbl">봉헌기도</td><td class="pf-val">'+(r.offerpray||'엄태우 목사')+'</td></tr>'
-    +'<tr><td class="pf-lbl">축복기도</td><td class="pf-val">'+(r.bless||'엄태우 목사')+'</td></tr>'
-    +'</table>'
-    +'<table class="t-att"><colgroup><col style="width:100px"><col></colgroup>'
-    +'<tr><td class="pf-lbl" style="vertical-align:top;padding-top:10px;">참석자명단</td>'
-    +'<td class="att-val">'
-    +(on.length ? '<div class="att-sec">&lt;현장&gt;</div><div class="att-names" style="margin-bottom:10px;">'+onsiteStr+'</div>' : '')
-    +(ol.length ? '<div class="att-sec">&lt;온라인&gt;</div><div class="att-names" style="margin-bottom:10px;">'+onlineStr+'</div>' : '')
-    +(vi.length ? '<div class="att-sec">&lt;방문자&gt;</div><div class="att-names">'+visitorStr+'</div>' : '')
-    +(!on.length&&!ol.length&&!vi.length ? '　' : '')
-    +'</td></tr></table>'
-    +'<table class="t-tot"><colgroup><col style="width:100px"><col></colgroup>'
-    +'<tr><td class="pf-lbl" style="line-height:1.6;">참석자<br>인원합계</td>'
-    +'<td class="tot-val">현장&nbsp;&nbsp;&nbsp;'+totOn+'명<br>온라인&nbsp;'+totOl+'명<br>총&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+tot+'명</td>'
-    +'</tr></table>'
-    +'</div>';
+  return result.join('\n');
 }
 
-function buildPageHTML(r) {
-  return '<!DOCTYPE html>\n<html lang="ko">\n<head>\n<meta charset="UTF-8">\n'
-    +'<meta name="viewport" content="width=device-width,initial-scale=1.0">\n'
-    +'<title>신촌연합교회 주일예배일지('+r.part+'부)_'+(r.date ? r.date.replace(/-/g,'') : '')+'</title>\n'
-    +'<style>\n'
-    +'*{box-sizing:border-box;margin:0;padding:0;}\n'
-    +'html,body{font-family:\'맑은 고딕\',\'Malgun Gothic\',\'Apple SD Gothic Neo\',sans-serif;background:#fff;color:#000;-webkit-font-smoothing:antialiased;}\n'
-    +'body{padding:10mm 13mm 8mm;}\n'
-    +'.pf-wrap{width:100%;}\n'
-    +'.pf-title{text-align:center;font-size:20pt;font-weight:800;padding:0 0 18px;letter-spacing:1px;}\n'
-    +'.pf-wrap table{width:100%;border-collapse:collapse;table-layout:fixed;}\n'
-    +'.pf-wrap td{font-size:11pt;vertical-align:middle;word-break:keep-all;padding:5px 10px;}\n'
-    +'.pf-lbl{background:#e8e8e8!important;font-weight:700;text-align:center;width:100px;min-width:100px;max-width:100px;white-space:nowrap;overflow:hidden;}\n'
-    +'.pf-val{background:#fff;}\n'
-    +'.t-head{border:1.5px solid #333;}\n'
-    +'.t-head td{border:1px solid #888;}\n'
-    +'.t-body{border:1.5px solid #333;border-top:none;}\n'
-    +'.t-body td{border:1px solid #888;border-top:none;}\n'
-    +'.t-body tr:first-child td{border-top:1px solid #888;}\n'
-    +'.t-att{border:1.5px solid #333;border-top:none;}\n'
-    +'.t-att td{border:1px solid #888;border-top:none;}\n'
-    +'.t-att tr:first-child td{border-top:1px solid #888;}\n'
-    +'.t-tot{border:1.5px solid #333;border-top:none;}\n'
-    +'.t-tot td{border:1px solid #888;border-top:none;}\n'
-    +'.t-tot tr:first-child td{border-top:1px solid #888;}\n'
-    +'.att-val{background:#fff;vertical-align:top!important;padding:9px 12px!important;line-height:1.9;font-size:10.5pt;}\n'
-    +'.att-sec{font-weight:700;margin-top:10px;font-size:11pt;}\n'
-    +'.att-sec:first-child{margin-top:0;}\n'
-    +'.att-names{word-break:keep-all;margin-top:3px;white-space:normal;}\n'
-    +'.tot-val{background:#fff;vertical-align:top!important;padding:8px 12px!important;line-height:2.1;font-size:11pt;}\n'
-    +'@media print{@page{size:A4 portrait;margin:10mm 13mm;}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}}\n'
-    +'</style>\n</head>\n<body>\n'
-    + buildPF(r)
-    +'\n<script>var t=setTimeout(function(){window.print();},2000);document.fonts.ready.then(function(){clearTimeout(t);window.print();});<\/script>\n'
-    +'</body>\n</html>';
+function collapseLines(text) {
+  return text.split(/\n/).map(l => l.trim()).filter(Boolean).join(' ');
 }
 
-init();
+updateSpeedHud();
 </script>
 </body>
 </html>
