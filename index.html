@@ -15,8 +15,8 @@
     --accent2: #6de8c9;
     --text: #f0f0f0;
     --muted: #555;
-    --panel-w: 340px;
-    --bar-h: 108px; /* 상단바 고정 높이 (2줄) */
+    --panel-w: 320px;
+    --bar-h: 88px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -31,7 +31,7 @@
     flex-direction: column;
   }
 
-  /* ── TOP BAR ── */
+  /* ── TOP BAR 고정 2행 ── */
   #topbar {
     height: var(--bar-h);
     min-height: var(--bar-h);
@@ -42,33 +42,34 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 0 12px;
-    gap: 6px;
+    padding: 0 10px;
+    gap: 5px;
     overflow: hidden;
   }
 
   .bar-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: nowrap;
+    overflow: hidden;
   }
 
   .logo {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--accent);
     letter-spacing: 2px;
     white-space: nowrap;
-    min-width: 72px;
+    min-width: 68px;
   }
 
   .ctrl-group {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     border-left: 1px solid var(--border);
-    padding-left: 8px;
+    padding-left: 6px;
   }
 
   .ctrl-label {
@@ -79,7 +80,7 @@
 
   input[type=range] {
     -webkit-appearance: none;
-    height: 4px;
+    height: 3px;
     border-radius: 2px;
     background: var(--border);
     outline: none;
@@ -87,7 +88,7 @@
   }
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 20px; height: 20px;
+    width: 16px; height: 16px;
     border-radius: 50%;
     background: var(--accent);
     cursor: pointer;
@@ -95,9 +96,9 @@
 
   .val-badge {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--accent);
-    min-width: 28px;
+    min-width: 26px;
     text-align: right;
   }
 
@@ -105,62 +106,60 @@
     background: none;
     border: 1px solid var(--border);
     color: var(--text);
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 13px;
+    border-radius: 5px;
+    padding: 4px 9px;
+    font-size: 12px;
     cursor: pointer;
     white-space: nowrap;
     transition: border-color .15s, color .15s, background .15s;
     font-family: inherit;
-    min-height: 36px;
+    height: 28px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 3px;
   }
   .btn:hover, .btn:active { border-color: var(--accent); color: var(--accent); }
   .btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
   #playBtn {
-    font-size: 18px;
-    padding: 6px 14px;
+    font-size: 15px;
+    padding: 4px 12px;
     border-color: var(--accent2);
     color: var(--accent2);
-    min-width: 48px;
+    min-width: 44px;
+    height: 28px;
   }
   #playBtn:hover, #playBtn.active { background: var(--accent2); color: #000; border-color: var(--accent2); }
-
-  #boldBtn { font-weight: 700; font-size: 15px; min-width: 36px; }
+  #boldBtn { font-weight: 700; font-size: 13px; min-width: 28px; }
 
   /* ── SEARCH BAR ── */
   #searchBar {
     display: none;
     align-items: center;
-    gap: 8px;
-    padding: 7px 12px;
+    gap: 6px;
+    padding: 5px 10px;
     background: #0f0f0f;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
   }
   #searchBar.open { display: flex; }
-
   #searchInput {
     flex: 1;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 5px;
     color: var(--text);
-    font-size: 15px;
-    padding: 7px 12px;
+    font-size: 14px;
+    padding: 5px 10px;
     outline: none;
     font-family: inherit;
-    min-height: 38px;
   }
   #searchInput:focus { border-color: var(--accent2); }
-
   #searchInfo {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--muted);
-    min-width: 56px;
+    min-width: 52px;
     text-align: center;
     font-family: 'JetBrains Mono', monospace;
   }
@@ -176,7 +175,7 @@
   /* ── SCRIPT PANEL ── */
   #scriptPanel {
     width: var(--panel-w);
-    min-width: 220px;
+    min-width: 180px;
     background: #0d0d0d;
     border-right: 1px solid var(--border);
     display: flex;
@@ -187,7 +186,7 @@
   #scriptPanel.hidden { display: none; }
 
   .panel-title {
-    padding: 8px 12px;
+    padding: 6px 10px;
     font-size: 10px;
     letter-spacing: 2px;
     color: var(--muted);
@@ -197,46 +196,43 @@
   }
 
   #uploadArea {
-    padding: 8px 10px;
+    padding: 7px 8px;
     border-bottom: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
     flex-shrink: 0;
   }
-  #uploadArea .btn { width: 100%; font-size: 13px; min-height: 40px; }
+  #uploadArea .btn { width: 100%; font-size: 12px; height: 32px; }
   #uploadStatus {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--accent2);
-    min-height: 14px;
+    min-height: 12px;
     text-align: center;
     font-family: 'JetBrains Mono', monospace;
   }
   #uploadStatus.err { color: #e86d6d; }
 
-  /* 스크립트 직접 편집 textarea */
   #scriptInput {
     flex: 1;
     background: transparent;
     border: none;
     color: var(--text);
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.8;
-    padding: 12px;
+    padding: 10px;
     resize: none;
     outline: none;
     font-family: 'Noto Sans KR', sans-serif;
     min-height: 0;
   }
 
-  /* ── RESIZE HANDLE ── */
+  /* ── RESIZE ── */
   #resizeHandle {
-    width: 6px;
+    width: 5px;
     cursor: col-resize;
     background: transparent;
     flex-shrink: 0;
-    position: relative;
-    z-index: 10;
     touch-action: none;
   }
   #resizeHandle:hover, #resizeHandle.dragging { background: var(--accent); opacity: .4; }
@@ -248,13 +244,13 @@
     position: relative;
     background: var(--bg);
     min-width: 0;
+    touch-action: none; /* 직접 터치 이벤트 처리 */
   }
 
   #prompter {
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
-    scroll-behavior: smooth;
     padding: 60px 0;
     scrollbar-width: none;
   }
@@ -264,8 +260,8 @@
     margin: 0 auto;
     line-height: 1.7;
     color: var(--text);
-    white-space: pre-wrap;
     word-break: break-word;
+    transition: font-size .1s;
   }
 
   body.mirror #prompterContent { transform: scaleX(-1); }
@@ -276,79 +272,83 @@
     border-radius: 2px;
     padding: 0 1px;
   }
-  #prompterContent mark.hit.current {
-    background: var(--accent);
-    color: #000;
-  }
+  #prompterContent mark.hit.current { background: var(--accent); color: #000; }
 
   #posBar {
     position: absolute;
     right: 0; top: 0; bottom: 0;
-    width: 4px;
+    width: 3px;
     background: var(--border);
   }
   #posThumb {
-    width: 4px;
+    width: 3px;
     background: var(--accent);
     border-radius: 2px;
     position: absolute;
     top: 0;
     transition: top .1s;
-    min-height: 24px;
+    min-height: 20px;
   }
 
   #speedHud {
     position: absolute;
-    bottom: 14px;
-    right: 14px;
+    bottom: 12px;
+    right: 10px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--muted);
     letter-spacing: 1px;
   }
+
+  /* 핀치줌 힌트 */
+  #pinchHint {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity .5s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #pinchHint.show { opacity: 1; }
 </style>
 </head>
 <body>
 
-<!-- TOP BAR: 2줄 고정 -->
+<!-- TOP BAR -->
 <div id="topbar">
-  <!-- 1행: 로고 + 슬라이더들 -->
   <div class="bar-row">
     <span class="logo">PROMPTER</span>
-
     <div class="ctrl-group">
       <span class="ctrl-label">글자</span>
-      <input type="range" id="fontRange" min="18" max="120" value="48" style="width:80px">
+      <input type="range" id="fontRange" min="18" max="120" value="48" style="width:75px">
       <span class="val-badge" id="fontVal">48</span>
     </div>
-
     <div class="ctrl-group">
       <span class="ctrl-label">너비</span>
-      <input type="range" id="widthRange" min="30" max="100" value="80" style="width:70px">
+      <input type="range" id="widthRange" min="30" max="100" value="80" style="width:65px">
       <span class="val-badge" id="widthVal">80%</span>
     </div>
-
     <div class="ctrl-group">
       <span class="ctrl-label">속도</span>
-      <input type="range" id="speedRange" min="0" max="10" step="0.5" value="2" style="width:70px">
+      <input type="range" id="speedRange" min="0" max="10" step="0.5" value="2" style="width:65px">
       <span class="val-badge" id="speedVal">2</span>
     </div>
-
     <div class="ctrl-group">
       <span class="ctrl-label">줄간격</span>
-      <input type="range" id="lineRange" min="1" max="3" step="0.1" value="1.7" style="width:70px">
+      <input type="range" id="lineRange" min="1" max="3" step="0.1" value="1.7" style="width:65px">
       <span class="val-badge" id="lineVal">1.7</span>
     </div>
-
     <div class="ctrl-group">
-      <button class="btn" id="boldBtn" title="볼드체">B</button>
+      <button class="btn" id="boldBtn">B</button>
     </div>
   </div>
-
-  <!-- 2행: 액션 버튼들 -->
   <div class="bar-row">
     <button class="btn" id="playBtn">▶</button>
-    <button class="btn" id="resetBtn" title="처음으로">↩ 처음</button>
+    <button class="btn" id="resetBtn">↩ 처음</button>
     <button class="btn" id="searchToggle">🔍 검색</button>
     <button class="btn" id="mirrorBtn">⇆ 미러</button>
     <button class="btn" id="panelToggle">📝 스크립트</button>
@@ -366,7 +366,6 @@
 
 <!-- MAIN -->
 <div id="main">
-  <!-- Script panel -->
   <div id="scriptPanel">
     <div class="panel-title">스크립트</div>
     <div id="uploadArea">
@@ -374,42 +373,33 @@
       <button class="btn" id="uploadBtn">📂 파일 불러오기 &nbsp;<span style="color:var(--muted);font-size:10px;">docx · txt</span></button>
       <div id="uploadStatus"></div>
     </div>
-    <textarea id="scriptInput" placeholder="여기에 스크립트를 직접 입력하거나 파일을 불러오세요."></textarea>
+    <textarea id="scriptInput" placeholder="스크립트를 직접 입력하거나 파일을 불러오세요."></textarea>
   </div>
-
-  <!-- Resize handle -->
   <div id="resizeHandle"></div>
-
-  <!-- Prompter -->
   <div id="prompterWrap">
     <div id="prompter">
       <div id="prompterContent"></div>
     </div>
     <div id="posBar"><div id="posThumb"></div></div>
     <div id="speedHud">정지</div>
+    <div id="pinchHint">👌 핀치로 글자 크기 조절</div>
   </div>
 </div>
 
 <script>
 // ── STATE ──
 const state = {
-  text: `안녕하세요, 여러분.\n\n오늘 발표에 오신 것을 환영합니다.\n\n저는 오늘 우리 팀이 지난 한 달간 준비한 프로젝트에 대해 말씀드리려고 합니다.\n\n먼저 배경 설명부터 시작하겠습니다.\n\n우리가 이 프로젝트를 시작하게 된 이유는 명확합니다.\n\n고객들의 요구사항이 빠르게 변화하고 있으며, 우리는 그에 맞춰 발 빠르게 대응해야 했습니다.\n\n감사합니다.`,
-  fontSize: 48,
-  width: 80,
-  speed: 2,
-  lineHeight: 1.7,
-  bold: false,
-  playing: false,
-  mirror: false,
-  searchHits: [],
-  currentHit: -1,
-  rafId: null,
-  lastTs: null,
+  text: `안녕하세요, 여러분.\n\n오늘 발표에 오신 것을 환영합니다.\n\n저는 오늘 우리 팀이 지난 한 달간 준비한 프로젝트에 대해 말씀드리려고 합니다.\n\n먼저 배경 설명부터 시작하겠습니다.\n\n고객들의 요구사항이 빠르게 변화하고 있으며, 우리는 그에 맞춰 발 빠르게 대응해야 했습니다.\n\n감사합니다.`,
+  fontSize: 48, width: 80, speed: 2, lineHeight: 1.7, bold: false,
+  playing: false, mirror: false,
+  searchHits: [], currentHit: -1,
+  rafId: null, lastTs: null,
 };
 
 // ── ELEMENTS ──
 const prompter        = document.getElementById('prompter');
 const prompterContent = document.getElementById('prompterContent');
+const prompterWrap    = document.getElementById('prompterWrap');
 const scriptInput     = document.getElementById('scriptInput');
 const fontRange       = document.getElementById('fontRange');
 const fontVal         = document.getElementById('fontVal');
@@ -435,6 +425,7 @@ const posThumb        = document.getElementById('posThumb');
 const speedHud        = document.getElementById('speedHud');
 const scriptPanel     = document.getElementById('scriptPanel');
 const resizeHandle    = document.getElementById('resizeHandle');
+const pinchHint       = document.getElementById('pinchHint');
 
 // ── INIT ──
 scriptInput.value = state.text;
@@ -442,14 +433,23 @@ renderPrompter();
 applyStyles();
 panelToggle.classList.add('active');
 
+// 첫 진입 시 핀치 힌트 잠깐 표시
+setTimeout(() => {
+  pinchHint.classList.add('show');
+  setTimeout(() => pinchHint.classList.remove('show'), 2500);
+}, 800);
+
 // ── RENDER ──
 function renderPrompter(keepRatio) {
   const ratio = keepRatio !== undefined ? keepRatio : getScrollRatio();
-  prompterContent.innerHTML = escapeAndHighlight(state.text);
+  prompterContent.innerHTML = toHtml(state.text);
+  if (searchBar.classList.contains('open') && searchInput.value) {
+    applySearch(searchInput.value, false);
+  }
   requestAnimationFrame(() => { setScrollRatio(ratio); updatePosBar(); });
 }
 
-function escapeAndHighlight(text) {
+function toHtml(text) {
   return text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -463,6 +463,8 @@ function applyStyles(keepRatio) {
   prompterContent.style.width      = state.width + '%';
   prompterContent.style.lineHeight = state.lineHeight;
   prompterContent.style.fontWeight = state.bold ? '700' : '400';
+  fontRange.value = state.fontSize;
+  fontVal.textContent = state.fontSize;
   requestAnimationFrame(() => setScrollRatio(ratio));
 }
 
@@ -476,9 +478,9 @@ function setScrollRatio(ratio) {
   prompter.scrollTop = ratio * max;
 }
 function updatePosBar() {
-  const ratio = getScrollRatio();
-  const barH  = document.getElementById('posBar').clientHeight;
-  const thumbH = Math.max(24, barH * (prompter.clientHeight / prompter.scrollHeight));
+  const ratio  = getScrollRatio();
+  const barH   = document.getElementById('posBar').clientHeight;
+  const thumbH = Math.max(20, barH * (prompter.clientHeight / prompter.scrollHeight));
   posThumb.style.height = thumbH + 'px';
   posThumb.style.top    = (ratio * (barH - thumbH)) + 'px';
 }
@@ -506,12 +508,9 @@ boldBtn.addEventListener('click', () => {
   boldBtn.classList.toggle('active', state.bold);
   applyStyles(getScrollRatio());
 });
-
-// 스크립트 패널 직접 편집 → 즉시 프롬프터 반영
 scriptInput.addEventListener('input', () => {
-  const ratio = getScrollRatio();
   state.text = scriptInput.value;
-  renderPrompter(ratio);
+  renderPrompter(getScrollRatio());
 });
 
 // ── PLAY ──
@@ -557,7 +556,6 @@ panelToggle.addEventListener('click', () => {
 // ── SEARCH ──
 searchToggle.addEventListener('click', openSearch);
 function openSearch() { searchBar.classList.add('open'); searchInput.focus(); searchInput.select(); }
-
 closeSearch.addEventListener('click', () => {
   searchBar.classList.remove('open');
   searchInput.value = '';
@@ -565,25 +563,22 @@ closeSearch.addEventListener('click', () => {
   searchInfo.textContent = '0 / 0';
   state.searchHits = []; state.currentHit = -1;
 });
-
 searchInput.addEventListener('input', () => applySearch(searchInput.value, true));
 
 function applySearch(query, resetIndex) {
   clearHighlights();
   state.searchHits = []; state.currentHit = -1;
   if (!query) { searchInfo.textContent = '0 / 0'; return; }
-
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const regex = new RegExp(`(${escaped})`, 'gi');
   let idx = 0;
-  prompterContent.innerHTML = escapeAndHighlight(state.text).replace(regex, m =>
+  prompterContent.innerHTML = toHtml(state.text).replace(regex, m =>
     `<mark class="hit" data-idx="${idx++}">${m}</mark>`
   );
   state.searchHits = Array.from(prompterContent.querySelectorAll('mark.hit'));
   searchInfo.textContent = `0 / ${state.searchHits.length}`;
-  if (resetIndex && state.searchHits.length > 0) jumpToHit(0); // 항상 첫 번째로
+  if (resetIndex && state.searchHits.length > 0) jumpToHit(0);
 }
-
 function jumpToHit(i) {
   if (!state.searchHits.length) return;
   if (state.currentHit >= 0 && state.currentHit < state.searchHits.length)
@@ -592,14 +587,12 @@ function jumpToHit(i) {
   const el = state.searchHits[state.currentHit];
   el.classList.add('current');
   searchInfo.textContent = `${state.currentHit + 1} / ${state.searchHits.length}`;
-  const targetTop = el.offsetTop - prompter.clientHeight / 2 + el.offsetHeight / 2;
-  prompter.scrollTo({ top: targetTop, behavior: 'smooth' });
+  prompter.scrollTo({ top: el.offsetTop - prompter.clientHeight / 2 + el.offsetHeight / 2, behavior: 'smooth' });
   setTimeout(updatePosBar, 350);
 }
 nextHit.addEventListener('click', () => jumpToHit(state.currentHit + 1));
 prevHit.addEventListener('click', () => jumpToHit(state.currentHit - 1));
-
-function clearHighlights() { prompterContent.innerHTML = escapeAndHighlight(state.text); }
+function clearHighlights() { prompterContent.innerHTML = toHtml(state.text); }
 
 // ── KEYBOARD ──
 document.addEventListener('keydown', e => {
@@ -615,7 +608,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeSearch.click();
 });
 
-// ── RESIZE PANEL (터치 지원) ──
+// ── RESIZE PANEL (마우스 + 터치) ──
 let resizing = false, startX = 0, startW = 0;
 resizeHandle.addEventListener('mousedown', e => { resizing = true; startX = e.clientX; startW = scriptPanel.offsetWidth; resizeHandle.classList.add('dragging'); });
 resizeHandle.addEventListener('touchstart', e => { resizing = true; startX = e.touches[0].clientX; startW = scriptPanel.offsetWidth; resizeHandle.classList.add('dragging'); }, { passive: true });
@@ -623,6 +616,37 @@ document.addEventListener('mousemove', e => { if (!resizing) return; scriptPanel
 document.addEventListener('touchmove', e => { if (!resizing) return; scriptPanel.style.width = Math.max(180, Math.min(600, startW + e.touches[0].clientX - startX)) + 'px'; }, { passive: true });
 document.addEventListener('mouseup',  () => { resizing = false; resizeHandle.classList.remove('dragging'); });
 document.addEventListener('touchend', () => { resizing = false; resizeHandle.classList.remove('dragging'); });
+
+// ── 핀치 줌 (프롬프터 영역 글자크기 조절) ──
+let pinchStartDist = 0, pinchStartSize = 0;
+
+function getTouchDist(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+prompterWrap.addEventListener('touchstart', e => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    pinchStartDist = getTouchDist(e.touches);
+    pinchStartSize = state.fontSize;
+  }
+}, { passive: false });
+
+prompterWrap.addEventListener('touchmove', e => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    const dist  = getTouchDist(e.touches);
+    const ratio = dist / pinchStartDist;
+    const newSize = Math.round(Math.min(120, Math.max(18, pinchStartSize * ratio)));
+    if (newSize !== state.fontSize) {
+      const scrollRatio = getScrollRatio();
+      state.fontSize = newSize;
+      applyStyles(scrollRatio);
+    }
+  }
+}, { passive: false });
 
 // ── FILE UPLOAD ──
 const uploadBtn    = document.getElementById('uploadBtn');
@@ -639,15 +663,15 @@ fileInput.addEventListener('change', async () => {
   uploadStatus.textContent = '읽는 중...';
   try {
     let text = '';
-    if (ext === 'txt')        text = await readTxt(file);
-    else if (ext === 'docx')  text = await readDocx(file);
+    if (ext === 'txt')       text = await readTxt(file);
+    else if (ext === 'docx') text = await readDocx(file);
     else throw new Error('docx 또는 txt 파일만 가능합니다');
     state.text = text.trim();
     scriptInput.value = state.text;
     renderPrompter(0);
     uploadStatus.textContent = '✓ ' + file.name;
     setTimeout(() => { uploadStatus.textContent = ''; }, 3000);
-  } catch (e) {
+  } catch(e) {
     uploadStatus.className = 'err';
     uploadStatus.textContent = '⚠ ' + e.message;
   }
@@ -678,6 +702,7 @@ async function readDocx(file) {
   return parseDocxHtml(htmlResult.value);
 }
 
+// ── DOCX 표 파싱 ──
 function parseDocxHtml(html) {
   const SECTION_RE = /^(오프닝|작품설명|엔딩)$/;
   const BREAK_RE   = /^\[(챕터|작품)\s*\S*\]$/;
@@ -686,35 +711,37 @@ function parseDocxHtml(html) {
   const doc    = parser.parseFromString(html, 'text/html');
   const result = [];
 
+  function addBreak() { if (result.length > 0) { result.push(''); result.push(''); } }
+  function collapse(text) { return text.split(/\n/).map(l => l.trim()).filter(Boolean).join(' '); }
+
   const tables = doc.querySelectorAll('table');
   if (tables.length > 0) {
     tables.forEach(table => {
       table.querySelectorAll('tr').forEach(row => {
-        const cells     = row.querySelectorAll('td, th');
+        const cells    = row.querySelectorAll('td, th');
         if (!cells.length) return;
         const leftText  = cells[0] ? cells[0].innerText.trim() : '';
         const rightText = cells[1] ? cells[1].innerText.trim() : '';
         const isSection = SECTION_RE.test(leftText);
         const isBreak   = BREAK_RE.test(leftText);
         if (isSection || isBreak) {
-          if (result.length > 0) { result.push(''); result.push(''); }
+          addBreak();
           result.push(leftText);
-          if (rightText) result.push(collapseLines(rightText));
+          if (rightText) result.push(collapse(rightText));
         } else {
           const content = rightText || leftText;
-          if (content) result.push(collapseLines(content));
+          if (content) result.push(collapse(content));
         }
       });
     });
   } else {
-    const paras = doc.querySelectorAll('p');
     let bodyLines = [];
-    paras.forEach(p => {
+    doc.querySelectorAll('p').forEach(p => {
       const text = p.innerText.trim();
       if (!text) return;
       if (SECTION_RE.test(text) || BREAK_RE.test(text)) {
         if (bodyLines.length) { result.push(bodyLines.join(' ')); bodyLines = []; }
-        if (result.length) { result.push(''); result.push(''); }
+        addBreak();
         result.push(text);
       } else {
         bodyLines.push(text);
@@ -723,10 +750,6 @@ function parseDocxHtml(html) {
     if (bodyLines.length) result.push(bodyLines.join(' '));
   }
   return result.join('\n');
-}
-
-function collapseLines(text) {
-  return text.split(/\n/).map(l => l.trim()).filter(Boolean).join(' ');
 }
 
 updateSpeedHud();
