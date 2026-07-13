@@ -263,12 +263,15 @@
     touch-action: none;
   }
 
-  /* 핀치 줌: prompterInner 전체를 scale */
+  /* 핀치/드래그 뷰 컨테이너 */
   #prompterInner {
+    position: absolute;
+    top: 0; left: 0;
     width: 100%;
     height: 100%;
-    transform-origin: top center;
-    overflow: hidden;
+    transform-origin: 0 0;
+    will-change: transform;
+    overflow: hidden; /* 내부 스크롤은 #prompter가 담당 */
   }
 
   #prompter {
@@ -430,7 +433,7 @@ const state = {
   text: `안녕하세요, 여러분.\n\n오늘 발표에 오신 것을 환영합니다.\n\n저는 오늘 우리 팀이 지난 한 달간 준비한 프로젝트에 대해 말씀드리려고 합니다.\n\n먼저 배경 설명부터 시작하겠습니다.\n\n고객들의 요구사항이 빠르게 변화하고 있으며, 우리는 그에 맞춰 발 빠르게 대응해야 했습니다.\n\n감사합니다.`,
   fontSize: 48, width: 80, speed: 2, lineHeight: 1.7, bold: false,
   playing: false, mirror: false,
-  zoom: 1.0,
+  zoom: 1.0, panX: 0, panY: 0,
   searchHits: [], currentHit: -1,
   rafId: null, lastTs: null,
 };
@@ -469,6 +472,7 @@ scriptInput.value = state.text;
 renderPrompter();
 applyStyles();
 panelToggle.classList.add('active');
+applyTransform(); // 초기 transform 설정
 
 // ── RENDER ──
 function renderPrompter(keepRatio) {
@@ -495,19 +499,46 @@ function applyStyles(keepRatio) {
   requestAnimationFrame(() => setScrollRatio(ratio));
 }
 
-function applyZoom(zoom, keepRatio) {
-  const ratio = keepRatio !== undefined ? keepRatio : getScrollRatio();
-  state.zoom = Math.min(3.0, Math.max(0.3, zoom));
-  prompterInner.style.transform = `scale(${state.zoom})`;
-  prompterInner.style.transformOrigin = 'top left';
-  prompterInner.style.width  = (100 / state.zoom) + '%';
-  prompterInner.style.height = (100 / state.zoom) + '%';
-  // 줌 HUD 표시
+function applyZoom(zoom, cx, cy) {
+  // cx, cy: 화면 좌표 기준 핀치 중심점
+  const prevZoom = state.zoom;
+  state.zoom = Math.min(4.0, Math.max(0.3, zoom));
+
+  if (cx !== undefined && cy !== undefined) {
+    // 핀치 중심점 기준으로 pan 보정
+    const rect = prompterWrap.getBoundingClientRect();
+    const px = cx - rect.left;
+    const py = cy - rect.top;
+    state.panX = px - (state.zoom / prevZoom) * (px - state.panX);
+    state.panY = py - (state.zoom / prevZoom) * (py - state.panY);
+  }
+
+  clampPan();
+  applyTransform();
+
   zoomHud.textContent = Math.round(state.zoom * 100) + '%';
   zoomHud.classList.add('show');
   clearTimeout(applyZoom._t);
   applyZoom._t = setTimeout(() => zoomHud.classList.remove('show'), 1200);
-  requestAnimationFrame(() => setScrollRatio(ratio));
+}
+
+function clampPan() {
+  const ww = prompterWrap.clientWidth;
+  const wh = prompterWrap.clientHeight;
+  const cw = prompterInner.scrollWidth * state.zoom;
+  const ch = prompterInner.scrollHeight * state.zoom;
+  // x: 화면보다 작으면 중앙, 크면 가장자리를 넘지 않도록
+  if (cw <= ww) {
+    state.panX = (ww - cw) / 2;
+  } else {
+    state.panX = Math.min(0, Math.max(ww - cw, state.panX));
+  }
+  // y: 상단 기준
+  state.panY = Math.min(0, Math.max(wh - ch, state.panY));
+}
+
+function applyTransform() {
+  prompterInner.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
 }
 
 // ── SCROLL ──
@@ -668,33 +699,67 @@ document.addEventListener('touchmove', e => { if (!resizing) return; scriptPanel
 document.addEventListener('mouseup',  () => { resizing = false; resizeHandle.classList.remove('dragging'); });
 document.addEventListener('touchend', () => { resizing = false; resizeHandle.classList.remove('dragging'); });
 
-// ── 핀치 줌 (화면 전체 scale) ──
-let pinchStartDist = 0, pinchStartZoom = 1;
+// ── 핀치 줌 + 드래그 팬 ──
+let touch = { pinching: false, dragging: false,
+  startDist: 0, startZoom: 1,
+  startX: 0, startY: 0, startPanX: 0, startPanY: 0,
+  midX: 0, midY: 0 };
 
 function getTouchDist(t) {
   const dx = t[0].clientX - t[1].clientX;
   const dy = t[0].clientY - t[1].clientY;
   return Math.sqrt(dx * dx + dy * dy);
 }
+function getTouchMid(t) {
+  return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
+}
 
 prompterWrap.addEventListener('touchstart', e => {
   if (resizing) return;
+  e.preventDefault();
   if (e.touches.length === 2) {
-    e.preventDefault();
-    pinchStartDist = getTouchDist(e.touches);
-    pinchStartZoom = state.zoom;
+    touch.pinching = true;
+    touch.dragging = false;
+    touch.startDist = getTouchDist(e.touches);
+    touch.startZoom = state.zoom;
+    const mid = getTouchMid(e.touches);
+    touch.midX = mid.x; touch.midY = mid.y;
+    touch.startPanX = state.panX; touch.startPanY = state.panY;
+  } else if (e.touches.length === 1) {
+    touch.dragging = true;
+    touch.pinching = false;
+    touch.startX = e.touches[0].clientX;
+    touch.startY = e.touches[0].clientY;
+    touch.startPanX = state.panX;
+    touch.startPanY = state.panY;
   }
 }, { passive: false });
 
 prompterWrap.addEventListener('touchmove', e => {
   if (resizing) return;
-  if (e.touches.length === 2) {
-    e.preventDefault();
-    const dist = getTouchDist(e.touches);
-    const newZoom = pinchStartZoom * (dist / pinchStartDist);
-    applyZoom(newZoom, getScrollRatio());
+  e.preventDefault();
+  if (touch.pinching && e.touches.length === 2) {
+    const dist  = getTouchDist(e.touches);
+    const mid   = getTouchMid(e.touches);
+    const newZoom = touch.startZoom * (dist / touch.startDist);
+    // pan도 핀치 시작점 기준 이동량 반영
+    state.panX = touch.startPanX + (mid.x - touch.midX);
+    state.panY = touch.startPanY + (mid.y - touch.midY);
+    applyZoom(newZoom, mid.x, mid.y);
+  } else if (touch.dragging && e.touches.length === 1) {
+    const dx = e.touches[0].clientX - touch.startX;
+    const dy = e.touches[0].clientY - touch.startY;
+    state.panX = touch.startPanX + dx;
+    state.panY = touch.startPanY + dy;
+    clampPan();
+    applyTransform();
   }
 }, { passive: false });
+
+prompterWrap.addEventListener('touchend', e => {
+  if (e.touches.length < 2) touch.pinching = false;
+  if (e.touches.length === 0) touch.dragging = false;
+}, { passive: true });
 
 // ── FILE UPLOAD ──
 const uploadBtn    = document.getElementById('uploadBtn');
