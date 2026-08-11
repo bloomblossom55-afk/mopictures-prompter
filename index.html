@@ -230,6 +230,40 @@
     overflow-y: auto;
   }
 
+  /* 스크립트 검색 하이라이트 오버레이 */
+  #scriptHighlightWrap {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  #scriptHighlight {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    font-size: 13px;
+    line-height: 1.8;
+    padding: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: transparent;
+    pointer-events: none;
+    overflow-y: auto;
+    scrollbar-width: none;
+    z-index: 1;
+  }
+  #scriptHighlight::-webkit-scrollbar { display: none; }
+  #scriptHighlight mark {
+    background: rgba(232,201,109,.45);
+    color: transparent;
+    border-radius: 2px;
+  }
+  #scriptHighlight mark.current {
+    background: var(--accent);
+  }
+
   /* ── PROMPTER ── */
   #prompterWrap {
     flex: 1;
@@ -404,13 +438,16 @@
       <button class="btn" id="uploadBtn">📂 파일 불러오기 &nbsp;<span style="color:var(--muted);font-size:10px;">docx · txt</span></button>
       <div id="uploadStatus"></div>
     </div>
-    <textarea id="scriptInput" placeholder="여기에 자막/스크립트를 입력하세요...
+    <div id="scriptHighlightWrap">
+      <div id="scriptHighlight"></div>
+      <textarea id="scriptInput" placeholder="여기에 자막/스크립트를 입력하세요...
 
 예시:
 안녕하세요, 여러분.
 오늘은 중요한 내용을 발표하겠습니다.
 
-준비되셨나요?"></textarea>
+준비되셨나요?" style="position:relative;z-index:2;background:transparent;"></textarea>
+    </div>
   </div>
 
   <!-- Resize handle -->
@@ -557,9 +594,16 @@ boldBtn.addEventListener('click', () => {
 });
 
 scriptInput.addEventListener('input', () => {
-  const ratio = getScrollRatio();
   state.text = scriptInput.value;
-  renderPrompter(ratio);
+  // 현재 프롬프터 스크롤 위치를 유지하며 반영
+  const ratio = getScrollRatio();
+  prompterContent.innerHTML = escapeAndMark(state.text);
+  requestAnimationFrame(() => {
+    setScrollRatio(ratio);
+    updatePosBar();
+  });
+  // 검색 중이면 오버레이도 갱신
+  if (scriptSearchInput.value) renderScriptHighlight(scriptSearchInput.value, scriptCurrentHit);
 });
 
 prompter.addEventListener('scroll', updatePosBar);
@@ -704,46 +748,86 @@ scriptSearchInput.addEventListener('input', () => {
   runScriptSearch(scriptSearchInput.value);
 });
 
-function runScriptSearch(query) {
-  clearScriptHighlights();
-  scriptHits = []; scriptCurrentHit = -1;
-  if (!query) { scriptSearchInfo.textContent = '0 / 0'; return; }
+// 오버레이 하이라이트 요소
+const scriptHighlight = document.getElementById('scriptHighlight');
 
+// 스크립트 textarea 스크롤 시 오버레이도 동기화
+scriptInput.addEventListener('scroll', () => {
+  scriptHighlight.scrollTop = scriptInput.scrollTop;
+});
+
+function runScriptSearch(query) {
+  scriptHits = []; scriptCurrentHit = -1;
+  if (!query) {
+    scriptSearchInfo.textContent = '0 / 0';
+    renderScriptHighlight('', -1);
+    return;
+  }
   const text = scriptInput.value;
   const lower = text.toLowerCase();
   const qLower = query.toLowerCase();
-  const positions = [];
   let pos = 0;
   while ((pos = lower.indexOf(qLower, pos)) !== -1) {
-    positions.push(pos);
+    scriptHits.push(pos);
     pos += qLower.length;
   }
-  scriptHits = positions;
   scriptSearchInfo.textContent = `0 / ${scriptHits.length}`;
-  if (scriptHits.length > 0) jumpScriptHit(0);
+  if (scriptHits.length > 0) {
+    scriptCurrentHit = 0;
+    scriptSearchInfo.textContent = `1 / ${scriptHits.length}`;
+  }
+  renderScriptHighlight(query, scriptCurrentHit);
+  if (scriptHits.length > 0) scrollScriptToHit(scriptCurrentHit);
 }
 
 function jumpScriptHit(i) {
   if (!scriptHits.length) return;
   scriptCurrentHit = (i + scriptHits.length) % scriptHits.length;
   scriptSearchInfo.textContent = `${scriptCurrentHit + 1} / ${scriptHits.length}`;
-  const pos = scriptHits[scriptCurrentHit];
-  const query = scriptSearchInput.value;
-  scriptInput.focus();
-  scriptInput.setSelectionRange(pos, pos + query.length);
-  // 해당 위치로 스크롤
-  const lineHeight = parseInt(getComputedStyle(scriptInput).lineHeight) || 22;
-  const lines = scriptInput.value.substring(0, pos).split('\n').length - 1;
-  scriptInput.scrollTop = lines * lineHeight - scriptInput.clientHeight / 2;
+  renderScriptHighlight(scriptSearchInput.value, scriptCurrentHit);
+  scrollScriptToHit(scriptCurrentHit);
 }
+
+function scrollScriptToHit(i) {
+  // 오버레이 스크롤 위치 계산 (focus/selection 없이)
+  const pos = scriptHits[i];
+  const textBefore = scriptInput.value.substring(0, pos);
+  const lines = textBefore.split('\n').length - 1;
+  const lineH = parseFloat(getComputedStyle(scriptInput).lineHeight) || 22;
+  const target = lines * lineH - scriptInput.clientHeight / 2 + lineH;
+  scriptInput.scrollTop = Math.max(0, target);
+  scriptHighlight.scrollTop = scriptInput.scrollTop;
+}
+
+function renderScriptHighlight(query, currentIdx) {
+  const text = scriptInput.value;
+  if (!query) { scriptHighlight.innerHTML = ''; return; }
+  const escaped_q = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escaped_q})`, 'gi');
+  let hitIdx = 0;
+  const html = escapeForOverlay(text).replace(regex, (m) => {
+    const cls = hitIdx++ === currentIdx ? 'current' : '';
+    return `<mark class="${cls}">${m}</mark>`;
+  });
+  scriptHighlight.innerHTML = html;
+  scriptHighlight.scrollTop = scriptInput.scrollTop;
+}
+
+function escapeForOverlay(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>');
+}
+
+
 
 function clearScriptSearch() {
   scriptHits = []; scriptCurrentHit = -1;
   scriptSearchInput.value = '';
   scriptSearchInfo.textContent = '0 / 0';
-}
-function clearScriptHighlights() {
-  // textarea는 highlight 불필요, 선택으로 표시
+  scriptHighlight.innerHTML = '';
 }
 
 scriptPrevHit.addEventListener('click', () => jumpScriptHit(scriptCurrentHit - 1));
