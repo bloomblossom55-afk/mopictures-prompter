@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>프롬프터</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap');
@@ -15,86 +15,55 @@
     --accent2: #6de8c9;
     --text: #f0f0f0;
     --muted: #555;
-    --panel-w: 300px;
-    --bar-h: 72px;
+    --panel-w: 320px;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Noto Sans KR', sans-serif;
-    height: 100dvh;
+    height: 100vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
   }
 
-  /* ── TOP BAR 고정 2행 ── */
+  /* ── TOP BAR ── */
   #topbar {
-    height: var(--bar-h);
-    min-height: var(--bar-h);
-    max-height: var(--bar-h);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 0 8px;
-    gap: 4px;
-    overflow: hidden;
+    flex-wrap: wrap;
   }
 
-  .bar-row {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex-wrap: nowrap;
-  }
-
-  .logo {
+  #topbar .logo {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-size: 13px;
     color: var(--accent);
     letter-spacing: 2px;
-    white-space: nowrap;
-    min-width: 62px;
+    margin-right: 6px;
   }
 
   .ctrl-group {
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 6px;
     border-left: 1px solid var(--border);
-    padding-left: 6px;
+    padding-left: 10px;
   }
 
   .ctrl-label {
-    font-size: 9px;
+    font-size: 11px;
     color: var(--muted);
     white-space: nowrap;
   }
 
-  /* 숫자 직접입력 */
-  .num-input {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    width: 42px;
-    height: 22px;
-    text-align: center;
-    outline: none;
-    padding: 0 2px;
-  }
-  .num-input:focus { border-color: var(--accent); }
-  .num-unit { font-size: 9px; color: var(--muted); }
-
-  /* 속도: 작은 슬라이더만 유지 */
   input[type=range] {
     -webkit-appearance: none;
     height: 3px;
@@ -105,125 +74,118 @@
   }
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 14px; height: 14px;
+    width: 13px; height: 13px;
     border-radius: 50%;
     background: var(--accent);
     cursor: pointer;
   }
+
   .val-badge {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-size: 11px;
     color: var(--accent);
-    min-width: 22px;
+    min-width: 32px;
     text-align: right;
   }
 
+  /* icon buttons */
   .btn {
     background: none;
     border: 1px solid var(--border);
     color: var(--text);
     border-radius: 4px;
-    padding: 3px 7px;
-    font-size: 11px;
+    padding: 4px 10px;
+    font-size: 12px;
     cursor: pointer;
     white-space: nowrap;
     transition: border-color .15s, color .15s, background .15s;
     font-family: inherit;
-    height: 24px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
   }
-  .btn:hover, .btn:active { border-color: var(--accent); color: var(--accent); }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
   .btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
+  /* speed control */
   #playBtn {
-    font-size: 14px;
-    padding: 3px 10px;
+    font-size: 16px;
+    padding: 4px 12px;
     border-color: var(--accent2);
     color: var(--accent2);
-    min-width: 38px;
-    height: 24px;
   }
   #playBtn:hover, #playBtn.active { background: var(--accent2); color: #000; border-color: var(--accent2); }
-  #boldBtn { font-weight: 700; font-size: 12px; min-width: 24px; }
 
   /* ── SEARCH BAR ── */
   #searchBar {
     display: none;
     align-items: center;
-    gap: 5px;
-    padding: 4px 8px;
+    gap: 8px;
+    padding: 6px 14px;
     background: #0f0f0f;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
   }
   #searchBar.open { display: flex; }
+
   #searchInput {
     flex: 1;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 4px;
     color: var(--text);
-    font-size: 13px;
-    padding: 4px 8px;
+    font-size: 14px;
+    padding: 5px 10px;
     outline: none;
     font-family: inherit;
   }
   #searchInput:focus { border-color: var(--accent2); }
+
   #searchInfo {
-    font-size: 10px;
+    font-size: 12px;
     color: var(--muted);
-    min-width: 46px;
+    min-width: 70px;
     text-align: center;
     font-family: 'JetBrains Mono', monospace;
   }
 
-  /* ── MAIN ── */
+  /* ── MAIN LAYOUT ── */
   #main {
     display: flex;
     flex: 1;
     overflow: hidden;
-    min-height: 0;
   }
 
   /* ── SCRIPT PANEL ── */
   #scriptPanel {
     width: var(--panel-w);
-    min-width: 160px;
+    min-width: 200px;
     background: #0d0d0d;
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    overflow: hidden;
   }
   #scriptPanel.hidden { display: none; }
 
-  .panel-title {
-    padding: 5px 10px;
-    font-size: 9px;
+  #scriptPanel .panel-title {
+    padding: 8px 12px;
+    font-size: 10px;
     letter-spacing: 2px;
     color: var(--muted);
     text-transform: uppercase;
     border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
   }
 
   #uploadArea {
-    padding: 6px 8px;
+    padding: 8px 10px;
     border-bottom: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    flex-shrink: 0;
+    gap: 5px;
   }
-  #uploadArea .btn { width: 100%; font-size: 11px; height: 28px; }
+  #uploadArea .btn { width: 100%; text-align: center; font-size: 12px; }
   #uploadStatus {
-    font-size: 9px;
+    font-size: 11px;
     color: var(--accent2);
-    min-height: 11px;
+    min-height: 14px;
     text-align: center;
     font-family: 'JetBrains Mono', monospace;
   }
@@ -234,24 +196,13 @@
     background: transparent;
     border: none;
     color: var(--text);
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.8;
-    padding: 10px;
+    padding: 14px;
     resize: none;
     outline: none;
     font-family: 'Noto Sans KR', sans-serif;
-    min-height: 0;
   }
-
-  /* ── RESIZE ── */
-  #resizeHandle {
-    width: 4px;
-    cursor: col-resize;
-    background: transparent;
-    flex-shrink: 0;
-    touch-action: none;
-  }
-  #resizeHandle:hover, #resizeHandle.dragging { background: var(--accent); opacity: .4; }
 
   /* ── PROMPTER ── */
   #prompterWrap {
@@ -259,26 +210,16 @@
     overflow: hidden;
     position: relative;
     background: var(--bg);
-    min-width: 0;
-  }
-
-  /* 핀치/드래그 뷰 컨테이너 */
-  #prompterInner {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    transform-origin: 0 0;
-    will-change: transform;
   }
 
   #prompter {
     height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+    scroll-behavior: smooth;
     padding: 60px 0;
+    /* hide scrollbar */
     scrollbar-width: none;
-    touch-action: pan-y;
   }
   #prompter::-webkit-scrollbar { display: none; }
 
@@ -286,25 +227,34 @@
     margin: 0 auto;
     line-height: 1.7;
     color: var(--text);
+    white-space: pre-wrap;
     word-break: break-word;
+    /* width & font-size set via JS */
   }
 
-  body.mirror #prompterContent { transform: scaleX(-1); }
+  /* mirrored */
+  body.mirror #prompterContent {
+    transform: scaleX(-1);
+  }
 
+  /* highlight */
   #prompterContent mark.hit {
     background: rgba(232,201,109,.25);
     color: var(--accent);
     border-radius: 2px;
     padding: 0 1px;
   }
-  #prompterContent mark.hit.current { background: var(--accent); color: #000; }
+  #prompterContent mark.hit.current {
+    background: var(--accent);
+    color: #000;
+  }
 
+  /* scroll position indicator */
   #posBar {
     position: absolute;
     right: 0; top: 0; bottom: 0;
     width: 3px;
     background: var(--border);
-    pointer-events: none;
   }
   #posThumb {
     width: 3px;
@@ -316,85 +266,119 @@
     min-height: 20px;
   }
 
+  /* speed overlay */
   #speedHud {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
+    bottom: 14px;
+    right: 14px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-size: 11px;
     color: var(--muted);
     letter-spacing: 1px;
-    pointer-events: none;
   }
 
-  /* 줌 레벨 표시 */
-  #zoomHud {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    opacity: 0;
-    transition: opacity .4s;
-    pointer-events: none;
-    white-space: nowrap;
+  /* resize handle */
+  #resizeHandle {
+    width: 5px;
+    cursor: col-resize;
+    background: transparent;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
   }
-  #zoomHud.show { opacity: 1; }
+  #resizeHandle:hover, #resizeHandle.dragging {
+    background: var(--accent);
+    opacity: .5;
+  }
+
+  /* ── MODAL: 스크립트 편집 ── */
+  #editModal {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  #editModal.open { display: flex; }
+  #editBox {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 680px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  #editBox h2 { font-size: 15px; color: var(--accent); }
+  #editTextarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 12px;
+    resize: vertical;
+    min-height: 300px;
+    outline: none;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  #editBox .row { display: flex; gap: 10px; justify-content: flex-end; }
 </style>
 </head>
 <body>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <!-- 1행: 수치 입력 -->
-  <div class="bar-row">
-    <span class="logo">PROMPTER</span>
+  <span class="logo">PROMPTER</span>
 
-    <div class="ctrl-group">
-      <span class="ctrl-label">글자</span>
-      <input class="num-input" type="number" id="fontInput" min="10" max="200" value="48">
-      <span class="num-unit">px</span>
-    </div>
-
-    <div class="ctrl-group">
-      <span class="ctrl-label">너비</span>
-      <input class="num-input" type="number" id="widthInput" min="20" max="100" value="80">
-      <span class="num-unit">%</span>
-    </div>
-
-    <div class="ctrl-group">
-      <span class="ctrl-label">줄간격</span>
-      <input class="num-input" type="number" id="lineInput" min="1" max="4" step="0.1" value="1.7" style="width:38px">
-    </div>
-
-    <div class="ctrl-group">
-      <button class="btn" id="boldBtn">B</button>
-    </div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">글자크기</span>
+    <input type="range" id="fontRange" min="18" max="120" value="48" style="width:90px">
+    <span class="val-badge" id="fontVal">48</span>
   </div>
 
-  <!-- 2행: 액션 버튼 + 속도 -->
-  <div class="bar-row">
-    <button class="btn" id="playBtn">▶</button>
-    <button class="btn" id="resetBtn">↩</button>
+  <div class="ctrl-group">
+    <span class="ctrl-label">너비</span>
+    <input type="range" id="widthRange" min="30" max="100" value="80" style="width:80px">
+    <span class="val-badge" id="widthVal">80%</span>
+  </div>
 
-    <div class="ctrl-group" style="border:none;padding:0;gap:4px">
-      <span class="ctrl-label" style="font-size:9px">속도</span>
-      <input type="range" id="speedRange" min="0" max="10" step="0.5" value="2" style="width:60px">
-      <span class="val-badge" id="speedVal">2</span>
-    </div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">속도</span>
+    <input type="range" id="speedRange" min="0" max="10" step="0.5" value="2" style="width:70px">
+    <span class="val-badge" id="speedVal">2</span>
+  </div>
 
-    <div class="ctrl-group" style="margin-left:auto">
-      <button class="btn" id="searchToggle">🔍</button>
-      <button class="btn" id="mirrorBtn">⇆</button>
-      <button class="btn" id="panelToggle">📝</button>
-    </div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">줄간격</span>
+    <input type="range" id="lineRange" min="1" max="3" step="0.1" value="1.7" style="width:70px">
+    <span class="val-badge" id="lineVal">1.7</span>
+  </div>
+
+  <div class="ctrl-group" style="gap:6px">
+    <button class="btn" id="boldBtn" title="볼드체 토글" style="font-weight:700;font-size:14px;min-width:34px">B</button>
+  </div>
+
+  <div class="ctrl-group" style="gap:6px">
+    <button class="btn" id="playBtn" title="스페이스바로도 제어">▶</button>
+    <button class="btn" id="resetBtn" title="처음으로">↩</button>
+  </div>
+
+  <div class="ctrl-group" style="gap:6px">
+    <button class="btn" id="searchToggle" title="검색 (Ctrl+F)">🔍 검색</button>
+    <button class="btn" id="mirrorBtn" title="좌우 반전">⇆ 미러</button>
+    <button class="btn" id="panelToggle" title="스크립트 패널">📝 스크립트</button>
+    <button class="btn" id="editBtn" title="스크립트 편집">✏️ 편집</button>
   </div>
 </div>
 
 <!-- SEARCH BAR -->
 <div id="searchBar">
+  <span style="color:var(--accent2);font-size:12px;white-space:nowrap">🔍 검색</span>
   <input type="text" id="searchInput" placeholder="검색어 입력...">
   <span id="searchInfo">0 / 0</span>
   <button class="btn" id="prevHit">▲</button>
@@ -404,220 +388,235 @@
 
 <!-- MAIN -->
 <div id="main">
+  <!-- Script panel -->
   <div id="scriptPanel">
     <div class="panel-title">스크립트</div>
     <div id="uploadArea">
       <input type="file" id="fileInput" accept=".docx,.txt" style="display:none">
-      <button class="btn" id="uploadBtn">📂 파일 불러오기 &nbsp;<span style="color:var(--muted);font-size:9px;">docx · txt</span></button>
+      <button class="btn" id="uploadBtn">📂 파일 불러오기 &nbsp;<span style="color:var(--muted);font-size:10px;">docx · txt</span></button>
       <div id="uploadStatus"></div>
     </div>
-    <textarea id="scriptInput" placeholder="스크립트를 직접 입력하거나 파일을 불러오세요."></textarea>
+    <textarea id="scriptInput" placeholder="여기에 자막/스크립트를 입력하세요...
+
+예시:
+안녕하세요, 여러분.
+오늘은 중요한 내용을 발표하겠습니다.
+
+준비되셨나요?"></textarea>
   </div>
+
+  <!-- Resize handle -->
   <div id="resizeHandle"></div>
+
+  <!-- Prompter -->
   <div id="prompterWrap">
-    <div id="prompterInner">
-      <div id="prompter">
-        <div id="prompterContent"></div>
-      </div>
+    <div id="prompter">
+      <div id="prompterContent"></div>
     </div>
     <div id="posBar"><div id="posThumb"></div></div>
-    <div id="speedHud">정지</div>
-    <div id="zoomHud">100%</div>
+    <div id="speedHud" id="speedHud">정지</div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal">
+  <div id="editBox">
+    <h2>✏️ 스크립트 편집</h2>
+    <textarea id="editTextarea"></textarea>
+    <div class="row">
+      <button class="btn" id="editCancel">취소</button>
+      <button class="btn active" id="editSave">저장 및 위치 유지</button>
+    </div>
   </div>
 </div>
 
 <script>
 // ── STATE ──
 const state = {
-  text: `안녕하세요, 여러분.\n\n오늘 발표에 오신 것을 환영합니다.\n\n저는 오늘 우리 팀이 지난 한 달간 준비한 프로젝트에 대해 말씀드리려고 합니다.\n\n먼저 배경 설명부터 시작하겠습니다.\n\n고객들의 요구사항이 빠르게 변화하고 있으며, 우리는 그에 맞춰 발 빠르게 대응해야 했습니다.\n\n감사합니다.`,
-  fontSize: 48, width: 80, speed: 2, lineHeight: 1.7, bold: false,
-  playing: false, mirror: false,
-  zoom: 1.0, panX: 0, panY: 0,
-  searchHits: [], currentHit: -1,
-  rafId: null, lastTs: null,
+  text: `안녕하세요, 여러분.\n\n오늘 발표에 오신 것을 환영합니다.\n\n저는 오늘 우리 팀이 지난 한 달간 준비한 프로젝트에 대해 말씀드리려고 합니다.\n\n먼저 배경 설명부터 시작하겠습니다.\n\n우리가 이 프로젝트를 시작하게 된 이유는 명확합니다.\n\n고객들의 요구사항이 빠르게 변화하고 있으며, 우리는 그에 맞춰 발 빠르게 대응해야 했습니다.\n\n팀원 모두가 밤낮으로 노력한 결과, 오늘 이 자리에서 여러분께 결과물을 보여드릴 수 있게 되었습니다.\n\n다음으로 주요 기능에 대해 설명드리겠습니다.\n\n첫 번째 기능은 실시간 데이터 분석입니다.\n\n두 번째 기능은 자동화된 보고서 생성입니다.\n\n세 번째 기능은 다양한 플랫폼과의 연동입니다.\n\n이 세 가지 기능이 결합되면 업무 효율이 크게 향상될 것으로 기대됩니다.\n\n마지막으로 향후 계획에 대해 말씀드리겠습니다.\n\n다음 분기에는 베타 테스트를 진행할 예정이며, 여러분의 소중한 피드백을 반영하여 더 나은 제품을 만들어 나가겠습니다.\n\n감사합니다.`,
+  fontSize: 48,
+  width: 80,
+  speed: 2,
+  lineHeight: 1.7,
+  bold: false,
+  playing: false,
+  mirror: false,
+  searchHits: [],
+  currentHit: -1,
+  rafId: null,
+  lastTs: null,
+  // position tracking: ratio 0~1
+  scrollRatio: 0,
 };
 
 // ── ELEMENTS ──
-const prompter        = document.getElementById('prompter');
-const prompterInner   = document.getElementById('prompterInner');
+const prompter      = document.getElementById('prompter');
 const prompterContent = document.getElementById('prompterContent');
-const prompterWrap    = document.getElementById('prompterWrap');
-const scriptInput     = document.getElementById('scriptInput');
-const fontInput       = document.getElementById('fontInput');
-const widthInput      = document.getElementById('widthInput');
-const lineInput       = document.getElementById('lineInput');
-const boldBtn         = document.getElementById('boldBtn');
-const playBtn         = document.getElementById('playBtn');
-const resetBtn        = document.getElementById('resetBtn');
-const speedRange      = document.getElementById('speedRange');
-const speedVal        = document.getElementById('speedVal');
-const mirrorBtn       = document.getElementById('mirrorBtn');
-const panelToggle     = document.getElementById('panelToggle');
-const searchToggle    = document.getElementById('searchToggle');
-const searchBar       = document.getElementById('searchBar');
-const searchInput     = document.getElementById('searchInput');
-const searchInfo      = document.getElementById('searchInfo');
-const prevHit         = document.getElementById('prevHit');
-const nextHit         = document.getElementById('nextHit');
-const closeSearch     = document.getElementById('closeSearch');
-const posThumb        = document.getElementById('posThumb');
-const speedHud        = document.getElementById('speedHud');
-const scriptPanel     = document.getElementById('scriptPanel');
-const resizeHandle    = document.getElementById('resizeHandle');
-const zoomHud         = document.getElementById('zoomHud');
+const scriptInput   = document.getElementById('scriptInput');
+const fontRange     = document.getElementById('fontRange');
+const fontVal       = document.getElementById('fontVal');
+const widthRange    = document.getElementById('widthRange');
+const widthVal      = document.getElementById('widthVal');
+const speedRange    = document.getElementById('speedRange');
+const speedVal      = document.getElementById('speedVal');
+const lineRange     = document.getElementById('lineRange');
+const lineVal       = document.getElementById('lineVal');
+const boldBtn       = document.getElementById('boldBtn');
+const playBtn       = document.getElementById('playBtn');
+const resetBtn      = document.getElementById('resetBtn');
+const mirrorBtn     = document.getElementById('mirrorBtn');
+const panelToggle   = document.getElementById('panelToggle');
+const editBtn       = document.getElementById('editBtn');
+const searchToggle  = document.getElementById('searchToggle');
+const searchBar     = document.getElementById('searchBar');
+const searchInput   = document.getElementById('searchInput');
+const searchInfo    = document.getElementById('searchInfo');
+const prevHit       = document.getElementById('prevHit');
+const nextHit       = document.getElementById('nextHit');
+const closeSearch   = document.getElementById('closeSearch');
+const posThumb      = document.getElementById('posThumb');
+const speedHud      = document.getElementById('speedHud');
+const scriptPanel   = document.getElementById('scriptPanel');
+const resizeHandle  = document.getElementById('resizeHandle');
+const editModal     = document.getElementById('editModal');
+const editTextarea  = document.getElementById('editTextarea');
+const editSave      = document.getElementById('editSave');
+const editCancel    = document.getElementById('editCancel');
 
 // ── INIT ──
 scriptInput.value = state.text;
 renderPrompter();
 applyStyles();
-panelToggle.classList.add('active');
-applyTransform(); // 초기 transform 설정
 
 // ── RENDER ──
 function renderPrompter(keepRatio) {
   const ratio = keepRatio !== undefined ? keepRatio : getScrollRatio();
-  prompterContent.innerHTML = toHtml(state.text);
-  if (searchBar.classList.contains('open') && searchInput.value) applySearch(searchInput.value, false);
-  requestAnimationFrame(() => { setScrollRatio(ratio); updatePosBar(); });
+  prompterContent.innerHTML = escapeAndMark(state.text);
+  // re-highlight if search active
+  if (searchBar.classList.contains('open') && searchInput.value) {
+    applySearch(searchInput.value, false);
+  }
+  // restore scroll position
+  requestAnimationFrame(() => {
+    setScrollRatio(ratio);
+    updatePosBar();
+  });
 }
 
-function toHtml(text) {
+function escapeAndMark(text) {
   return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\n/g, '<br>');
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
 }
 
 function applyStyles(keepRatio) {
   const ratio = keepRatio !== undefined ? keepRatio : getScrollRatio();
-  prompterContent.style.fontSize   = state.fontSize + 'px';
-  prompterContent.style.width      = state.width + '%';
+  prompterContent.style.fontSize = state.fontSize + 'px';
+  prompterContent.style.width = state.width + '%';
   prompterContent.style.lineHeight = state.lineHeight;
   prompterContent.style.fontWeight = state.bold ? '700' : '400';
   requestAnimationFrame(() => setScrollRatio(ratio));
 }
 
-function applyZoom(zoom, cx, cy) {
-  // cx, cy: 화면 좌표 기준 핀치 중심점
-  const prevZoom = state.zoom;
-  state.zoom = Math.min(4.0, Math.max(0.3, zoom));
-
-  if (cx !== undefined && cy !== undefined) {
-    // 핀치 중심점 기준으로 pan 보정
-    const rect = prompterWrap.getBoundingClientRect();
-    const px = cx - rect.left;
-    const py = cy - rect.top;
-    state.panX = px - (state.zoom / prevZoom) * (px - state.panX);
-    state.panY = py - (state.zoom / prevZoom) * (py - state.panY);
-  }
-
-  clampPan();
-  applyTransform();
-
-  zoomHud.textContent = Math.round(state.zoom * 100) + '%';
-  zoomHud.classList.add('show');
-  clearTimeout(applyZoom._t);
-  applyZoom._t = setTimeout(() => zoomHud.classList.remove('show'), 1200);
-}
-
-function clampPan() {
-  const ww = prompterWrap.clientWidth;
-  const wh = prompterWrap.clientHeight;
-  const cw = prompterInner.scrollWidth * state.zoom;
-  const ch = prompterInner.scrollHeight * state.zoom;
-  // x: 화면보다 작으면 중앙, 크면 가장자리를 넘지 않도록
-  if (cw <= ww) {
-    state.panX = (ww - cw) / 2;
-  } else {
-    state.panX = Math.min(0, Math.max(ww - cw, state.panX));
-  }
-  // y: 상단 기준
-  state.panY = Math.min(0, Math.max(wh - ch, state.panY));
-}
-
-function applyTransform() {
-  prompterInner.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
-}
-
-// ── SCROLL ──
+// ── SCROLL RATIO ──
 function getScrollRatio() {
   const max = prompter.scrollHeight - prompter.clientHeight;
   return max <= 0 ? 0 : prompter.scrollTop / max;
 }
+
 function setScrollRatio(ratio) {
   const max = prompter.scrollHeight - prompter.clientHeight;
   prompter.scrollTop = ratio * max;
 }
+
 function updatePosBar() {
-  const ratio  = getScrollRatio();
-  const barH   = document.getElementById('posBar').clientHeight;
+  const ratio = getScrollRatio();
+  const barH = document.getElementById('posBar').clientHeight;
   const thumbH = Math.max(20, barH * (prompter.clientHeight / prompter.scrollHeight));
   posThumb.style.height = thumbH + 'px';
-  posThumb.style.top    = (ratio * (barH - thumbH)) + 'px';
+  posThumb.style.top = (ratio * (barH - thumbH)) + 'px';
 }
-prompter.addEventListener('scroll', updatePosBar);
 
-// ── NUM INPUTS ──
-fontInput.addEventListener('change', () => {
-  const v = Math.min(200, Math.max(10, +fontInput.value || 48));
-  fontInput.value = v;
-  state.fontSize = v;
+// ── CONTROLS ──
+fontRange.addEventListener('input', () => {
+  state.fontSize = +fontRange.value;
+  fontVal.textContent = state.fontSize;
   applyStyles(getScrollRatio());
-});
-widthInput.addEventListener('change', () => {
-  const v = Math.min(100, Math.max(20, +widthInput.value || 80));
-  widthInput.value = v;
-  state.width = v;
-  applyStyles(getScrollRatio());
-});
-lineInput.addEventListener('change', () => {
-  const v = Math.min(4, Math.max(1, +lineInput.value || 1.7));
-  lineInput.value = v;
-  state.lineHeight = v;
-  applyStyles(getScrollRatio());
-});
-boldBtn.addEventListener('click', () => {
-  state.bold = !state.bold;
-  boldBtn.classList.toggle('active', state.bold);
-  applyStyles(getScrollRatio());
-});
-scriptInput.addEventListener('input', () => {
-  state.text = scriptInput.value;
-  renderPrompter(getScrollRatio());
 });
 
-// ── SPEED ──
+widthRange.addEventListener('input', () => {
+  state.width = +widthRange.value;
+  widthVal.textContent = state.width + '%';
+  applyStyles(getScrollRatio());
+});
+
 speedRange.addEventListener('input', () => {
   state.speed = +speedRange.value;
   speedVal.textContent = state.speed;
   updateSpeedHud();
 });
 
-// ── PLAY ──
+lineRange.addEventListener('input', () => {
+  state.lineHeight = +lineRange.value;
+  lineVal.textContent = state.lineHeight.toFixed(1);
+  applyStyles(getScrollRatio());
+});
+
+boldBtn.addEventListener('click', () => {
+  state.bold = !state.bold;
+  boldBtn.classList.toggle('active', state.bold);
+  applyStyles(getScrollRatio());
+});
+
+scriptInput.addEventListener('input', () => {
+  const ratio = getScrollRatio();
+  state.text = scriptInput.value;
+  renderPrompter(ratio);
+});
+
+prompter.addEventListener('scroll', updatePosBar);
+
 function updateSpeedHud() {
   speedHud.textContent = state.playing ? `▶ ×${state.speed}` : '정지';
 }
+
+// ── PLAY / PAUSE ──
 function togglePlay() {
   state.playing = !state.playing;
   playBtn.textContent = state.playing ? '⏸' : '▶';
   playBtn.classList.toggle('active', state.playing);
   updateSpeedHud();
-  if (state.playing) { state.lastTs = null; state.rafId = requestAnimationFrame(scrollTick); }
-  else cancelAnimationFrame(state.rafId);
+  if (state.playing) {
+    state.lastTs = null;
+    state.rafId = requestAnimationFrame(scroll);
+  } else {
+    cancelAnimationFrame(state.rafId);
+  }
 }
-function scrollTick(ts) {
+
+function scroll(ts) {
   if (!state.lastTs) state.lastTs = ts;
-  const dt = ts - state.lastTs; state.lastTs = ts;
+  const dt = ts - state.lastTs;
+  state.lastTs = ts;
   prompter.scrollTop += state.speed * dt / 16;
   updatePosBar();
+  // stop at bottom
   if (prompter.scrollTop >= prompter.scrollHeight - prompter.clientHeight) {
-    state.playing = false; playBtn.textContent = '▶'; playBtn.classList.remove('active'); updateSpeedHud(); return;
+    state.playing = false;
+    playBtn.textContent = '▶';
+    playBtn.classList.remove('active');
+    updateSpeedHud();
+    return;
   }
-  state.rafId = requestAnimationFrame(scrollTick);
+  state.rafId = requestAnimationFrame(scroll);
 }
+
 playBtn.addEventListener('click', togglePlay);
-resetBtn.addEventListener('click', () => { prompter.scrollTop = 0; updatePosBar(); });
+resetBtn.addEventListener('click', () => {
+  prompter.scrollTop = 0;
+  updatePosBar();
+});
 
 // ── MIRROR ──
 mirrorBtn.addEventListener('click', () => {
@@ -628,38 +627,85 @@ mirrorBtn.addEventListener('click', () => {
 
 // ── PANEL TOGGLE ──
 panelToggle.addEventListener('click', () => {
-  const ratio = getScrollRatio();
   scriptPanel.classList.toggle('hidden');
   panelToggle.classList.toggle('active', !scriptPanel.classList.contains('hidden'));
+  // keep ratio after layout change
+  const ratio = getScrollRatio();
   requestAnimationFrame(() => setScrollRatio(ratio));
+});
+panelToggle.classList.add('active');
+
+// ── EDIT MODAL ──
+editBtn.addEventListener('click', () => {
+  editTextarea.value = state.text;
+  editModal.classList.add('open');
+  editTextarea.focus();
+});
+
+editSave.addEventListener('click', () => {
+  const ratio = getScrollRatio();
+  state.text = editTextarea.value;
+  scriptInput.value = state.text;
+  editModal.classList.remove('open');
+  renderPrompter(ratio);
+});
+
+editCancel.addEventListener('click', () => {
+  editModal.classList.remove('open');
+});
+
+editModal.addEventListener('click', e => {
+  if (e.target === editModal) editModal.classList.remove('open');
 });
 
 // ── SEARCH ──
 searchToggle.addEventListener('click', openSearch);
-function openSearch() { searchBar.classList.add('open'); searchInput.focus(); searchInput.select(); }
+
+function openSearch() {
+  searchBar.classList.add('open');
+  searchInput.focus();
+  searchInput.select();
+}
+
 closeSearch.addEventListener('click', () => {
   searchBar.classList.remove('open');
   searchInput.value = '';
   clearHighlights();
   searchInfo.textContent = '0 / 0';
-  state.searchHits = []; state.currentHit = -1;
+  state.searchHits = [];
+  state.currentHit = -1;
 });
-searchInput.addEventListener('input', () => applySearch(searchInput.value, true));
+
+searchInput.addEventListener('input', () => {
+  applySearch(searchInput.value, true);
+});
 
 function applySearch(query, resetIndex) {
   clearHighlights();
-  state.searchHits = []; state.currentHit = -1;
-  if (!query) { searchInfo.textContent = '0 / 0'; return; }
+  state.searchHits = [];
+  state.currentHit = -1;
+
+  if (!query) {
+    searchInfo.textContent = '0 / 0';
+    return;
+  }
+
+  // Highlight in HTML
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const regex = new RegExp(`(${escaped})`, 'gi');
   let idx = 0;
-  prompterContent.innerHTML = toHtml(state.text).replace(regex, m =>
-    `<mark class="hit" data-idx="${idx++}">${m}</mark>`
-  );
+  prompterContent.innerHTML = escapeAndMark(state.text).replace(regex, (m) => {
+    return `<mark class="hit" data-idx="${idx++}">${m}</mark>`;
+  });
+
   state.searchHits = Array.from(prompterContent.querySelectorAll('mark.hit'));
   searchInfo.textContent = `0 / ${state.searchHits.length}`;
-  if (resetIndex && state.searchHits.length > 0) jumpToHit(0);
+
+  if (resetIndex && state.searchHits.length > 0) {
+    jumpToHit(0); // 항상 첫 번째 결과로 이동
+  }
 }
+
 function jumpToHit(i) {
   if (!state.searchHits.length) return;
   if (state.currentHit >= 0 && state.currentHit < state.searchHits.length)
@@ -668,99 +714,63 @@ function jumpToHit(i) {
   const el = state.searchHits[state.currentHit];
   el.classList.add('current');
   searchInfo.textContent = `${state.currentHit + 1} / ${state.searchHits.length}`;
-  prompter.scrollTo({ top: el.offsetTop - prompter.clientHeight / 2 + el.offsetHeight / 2, behavior: 'smooth' });
+  // scroll so hit is near center
+  const targetTop = el.offsetTop - prompter.clientHeight / 2 + el.offsetHeight / 2;
+  prompter.scrollTo({ top: targetTop, behavior: 'smooth' });
   setTimeout(updatePosBar, 350);
 }
+
 nextHit.addEventListener('click', () => jumpToHit(state.currentHit + 1));
 prevHit.addEventListener('click', () => jumpToHit(state.currentHit - 1));
-function clearHighlights() { prompterContent.innerHTML = toHtml(state.text); }
 
-// ── KEYBOARD ──
+function clearHighlights() {
+  // re-render plain text to remove all marks
+  prompterContent.innerHTML = escapeAndMark(state.text);
+}
+
+// ── KEYBOARD SHORTCUTS ──
 document.addEventListener('keydown', e => {
+  // prevent in textareas/inputs
   const tag = document.activeElement.tagName;
   if (tag === 'TEXTAREA' || tag === 'INPUT') {
-    if (e.key === 'Escape') { document.activeElement.blur(); closeSearch.click(); }
+    if (e.key === 'Escape') {
+      document.activeElement.blur();
+      if (editModal.classList.contains('open')) editModal.classList.remove('open');
+      if (searchBar.classList.contains('open')) closeSearch.click();
+    }
     return;
   }
+
   if (e.ctrlKey && e.key === 'f') { e.preventDefault(); openSearch(); return; }
   if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); togglePlay(); return; }
-  if (e.key === 'ArrowUp')   prompter.scrollBy({ top: -80, behavior: 'smooth' });
-  if (e.key === 'ArrowDown') prompter.scrollBy({ top:  80, behavior: 'smooth' });
-  if (e.key === 'Escape') closeSearch.click();
+  if (e.key === 'ArrowUp')   { prompter.scrollBy({top: -80, behavior:'smooth'}); }
+  if (e.key === 'ArrowDown') { prompter.scrollBy({top:  80, behavior:'smooth'}); }
+  if (e.key === 'Escape') {
+    if (editModal.classList.contains('open')) editModal.classList.remove('open');
+    if (searchBar.classList.contains('open')) closeSearch.click();
+  }
 });
 
 // ── RESIZE PANEL ──
 let resizing = false, startX = 0, startW = 0;
-resizeHandle.addEventListener('mousedown', e => { resizing = true; startX = e.clientX; startW = scriptPanel.offsetWidth; resizeHandle.classList.add('dragging'); });
-resizeHandle.addEventListener('touchstart', e => { resizing = true; startX = e.touches[0].clientX; startW = scriptPanel.offsetWidth; resizeHandle.classList.add('dragging'); }, { passive: true });
-document.addEventListener('mousemove', e => { if (!resizing) return; scriptPanel.style.width = Math.max(160, Math.min(600, startW + e.clientX - startX)) + 'px'; });
-document.addEventListener('touchmove', e => { if (!resizing) return; scriptPanel.style.width = Math.max(160, Math.min(600, startW + e.touches[0].clientX - startX)) + 'px'; }, { passive: true });
-document.addEventListener('mouseup',  () => { resizing = false; resizeHandle.classList.remove('dragging'); });
-document.addEventListener('touchend', () => { resizing = false; resizeHandle.classList.remove('dragging'); });
+resizeHandle.addEventListener('mousedown', e => {
+  resizing = true;
+  startX = e.clientX;
+  startW = scriptPanel.offsetWidth;
+  resizeHandle.classList.add('dragging');
+});
+document.addEventListener('mousemove', e => {
+  if (!resizing) return;
+  const delta = e.clientX - startX;
+  const newW = Math.max(150, Math.min(600, startW + delta));
+  scriptPanel.style.width = newW + 'px';
+});
+document.addEventListener('mouseup', () => {
+  if (resizing) { resizing = false; resizeHandle.classList.remove('dragging'); }
+});
 
-// ── 핀치 줌 + 드래그 팬 ──
-let touch = { pinching: false, dragging: false,
-  startDist: 0, startZoom: 1,
-  startX: 0, startY: 0, startPanX: 0, startPanY: 0,
-  midX: 0, midY: 0 };
-
-function getTouchDist(t) {
-  const dx = t[0].clientX - t[1].clientX;
-  const dy = t[0].clientY - t[1].clientY;
-  return Math.sqrt(dx * dx + dy * dy);
-}
-function getTouchMid(t) {
-  return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
-}
-
-// 핀치(2손가락)만 가로채고, 1손가락은 #prompter 기본 스크롤에 맡김
-prompterWrap.addEventListener('touchstart', e => {
-  if (resizing) return;
-  if (e.touches.length === 2) {
-    e.preventDefault(); // 핀치만 기본동작 차단
-    touch.pinching = true;
-    touch.dragging = false;
-    touch.startDist = getTouchDist(e.touches);
-    touch.startZoom = state.zoom;
-    const mid = getTouchMid(e.touches);
-    touch.midX = mid.x; touch.midY = mid.y;
-    touch.startPanX = state.panX; touch.startPanY = state.panY;
-  } else if (e.touches.length === 1 && state.zoom > 1.05) {
-    // 줌된 상태에서만 팬 드래그 활성화
-    touch.dragging = true;
-    touch.pinching = false;
-    touch.startX = e.touches[0].clientX;
-    touch.startY = e.touches[0].clientY;
-    touch.startPanX = state.panX;
-    touch.startPanY = state.panY;
-  }
-}, { passive: false });
-
-prompterWrap.addEventListener('touchmove', e => {
-  if (resizing) return;
-  if (touch.pinching && e.touches.length === 2) {
-    e.preventDefault();
-    const dist  = getTouchDist(e.touches);
-    const mid   = getTouchMid(e.touches);
-    const newZoom = touch.startZoom * (dist / touch.startDist);
-    state.panX = touch.startPanX + (mid.x - touch.midX);
-    state.panY = touch.startPanY + (mid.y - touch.midY);
-    applyZoom(newZoom, mid.x, mid.y);
-  } else if (touch.dragging && e.touches.length === 1 && state.zoom > 1.05) {
-    e.preventDefault();
-    const dx = e.touches[0].clientX - touch.startX;
-    const dy = e.touches[0].clientY - touch.startY;
-    state.panX = touch.startPanX + dx;
-    state.panY = touch.startPanY + dy;
-    clampPan();
-    applyTransform();
-  }
-}, { passive: false });
-
-prompterWrap.addEventListener('touchend', e => {
-  if (e.touches.length < 2) touch.pinching = false;
-  if (e.touches.length === 0) touch.dragging = false;
-}, { passive: true });
+// ── INITIAL SPEEDHUD ──
+updateSpeedHud();
 
 // ── FILE UPLOAD ──
 const uploadBtn    = document.getElementById('uploadBtn');
@@ -768,24 +778,32 @@ const fileInput    = document.getElementById('fileInput');
 const uploadStatus = document.getElementById('uploadStatus');
 
 uploadBtn.addEventListener('click', () => fileInput.click());
+
 fileInput.addEventListener('change', async () => {
   const file = fileInput.files[0];
   if (!file) return;
   fileInput.value = '';
+
   const ext = file.name.split('.').pop().toLowerCase();
   uploadStatus.className = '';
   uploadStatus.textContent = '읽는 중...';
+
   try {
     let text = '';
-    if (ext === 'txt')       text = await readTxt(file);
-    else if (ext === 'docx') text = await readDocx(file);
-    else throw new Error('docx 또는 txt 파일만 가능합니다');
+    if (ext === 'txt') {
+      text = await readTxt(file);
+    } else if (ext === 'docx') {
+      text = await readDocx(file);
+    } else {
+      throw new Error('docx 또는 txt 파일만 가능합니다');
+    }
+
     state.text = text.trim();
     scriptInput.value = state.text;
     renderPrompter(0);
     uploadStatus.textContent = '✓ ' + file.name;
     setTimeout(() => { uploadStatus.textContent = ''; }, 3000);
-  } catch(e) {
+  } catch (e) {
     uploadStatus.className = 'err';
     uploadStatus.textContent = '⚠ ' + e.message;
   }
@@ -793,10 +811,10 @@ fileInput.addEventListener('change', async () => {
 
 function readTxt(file) {
   return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = e => resolve(e.target.result);
-    r.onerror = () => reject(new Error('파일을 읽을 수 없습니다'));
-    r.readAsText(file, 'UTF-8');
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = () => reject(new Error('파일을 읽을 수 없습니다'));
+    reader.readAsText(file, 'UTF-8');
   });
 }
 
@@ -811,60 +829,48 @@ async function readDocx(file) {
     });
   }
   const arrayBuffer = await file.arrayBuffer();
-  const htmlResult  = await mammoth.convertToHtml({ arrayBuffer });
-  if (!htmlResult.value) throw new Error('텍스트를 추출할 수 없습니다');
-  return parseDocxHtml(htmlResult.value);
+  const result = await mammoth.extractRawText({ arrayBuffer });
+  if (!result.value) throw new Error('텍스트를 추출할 수 없습니다');
+  return formatScript(result.value);
 }
 
-function parseDocxHtml(html) {
+function formatScript(raw) {
+  // 단락 구분 키워드: 오프닝, 작품설명, 엔딩 / [챕터 숫자]
   const SECTION_RE = /^(오프닝|작품설명|엔딩)$/;
-  const BREAK_RE   = /^\[(챕터|작품)\s*\S*\]$/;
-  const parser = new DOMParser();
-  const doc    = parser.parseFromString(html, 'text/html');
+  const CHAPTER_RE = /^\[(챕터|작품)\s*\S*\]/;
+
+  const lines = raw.split(/\r?\n/);
   const result = [];
+  let prevWasContent = false;
 
-  function addBreak() { if (result.length > 0) { result.push(''); result.push(''); } }
-  function collapse(text) { return text.split(/\n/).map(l => l.trim()).filter(Boolean).join(' '); }
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
 
-  const tables = doc.querySelectorAll('table');
-  if (tables.length > 0) {
-    tables.forEach(table => {
-      table.querySelectorAll('tr').forEach(row => {
-        const cells     = row.querySelectorAll('td, th');
-        if (!cells.length) return;
-        const leftText  = cells[0] ? cells[0].innerText.trim() : '';
-        const rightText = cells[1] ? cells[1].innerText.trim() : '';
-        const isSection = SECTION_RE.test(leftText);
-        const isBreak   = BREAK_RE.test(leftText);
-        if (isSection || isBreak) {
-          addBreak();
-          result.push(leftText);
-          if (rightText) result.push(collapse(rightText));
-        } else {
-          const content = rightText || leftText;
-          if (content) result.push(collapse(content));
-        }
-      });
-    });
-  } else {
-    let bodyLines = [];
-    doc.querySelectorAll('p').forEach(p => {
-      const text = p.innerText.trim();
-      if (!text) return;
-      if (SECTION_RE.test(text) || BREAK_RE.test(text)) {
-        if (bodyLines.length) { result.push(bodyLines.join(' ')); bodyLines = []; }
-        addBreak();
-        result.push(text);
+    // 빈 줄 → 무시
+    if (!line) continue;
+
+    const isSection = SECTION_RE.test(line);
+    const isChapter = CHAPTER_RE.test(line);
+
+    if (isSection || isChapter) {
+      // 단락 구분: 앞에 빈 줄 추가 (결과가 비어있지 않을 때만)
+      if (result.length > 0) result.push('');
+      result.push(line);
+      prevWasContent = false;
+    } else {
+      // 일반 본문: 이어붙이기 (줄바꿈 제거)
+      if (prevWasContent) {
+        // 직전 줄에 이어붙임
+        result[result.length - 1] += ' ' + line;
       } else {
-        bodyLines.push(text);
+        result.push(line);
+        prevWasContent = true;
       }
-    });
-    if (bodyLines.length) result.push(bodyLines.join(' '));
+    }
   }
+
   return result.join('\n');
 }
-
-updateSpeedHud();
 </script>
 </body>
 </html>
