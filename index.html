@@ -20,14 +20,23 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html, body {
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Noto Sans KR', sans-serif;
-    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    position: fixed;
+    width: 100%;
+    top: 0; left: 0;
   }
 
   /* ── TOP BAR ── */
@@ -163,6 +172,7 @@
     display: flex;
     flex: 1;
     overflow: hidden;
+    min-height: 0;
   }
 
   /* ── SCRIPT PANEL ── */
@@ -174,6 +184,8 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    overflow: hidden;
+    min-height: 0;
   }
   #scriptPanel.hidden { display: none; }
 
@@ -214,6 +226,8 @@
     resize: none;
     outline: none;
     font-family: 'Noto Sans KR', sans-serif;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   /* ── PROMPTER ── */
@@ -277,6 +291,38 @@
 
   /* speed overlay */
 
+
+  /* ── SCRIPT SEARCH BAR ── */
+  #scriptSearchBar {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: #0d0d0d;
+  }
+  #scriptSearchInput {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 12px;
+    padding: 3px 7px;
+    outline: none;
+    font-family: inherit;
+    min-width: 0;
+  }
+  #scriptSearchInput:focus { border-color: var(--accent2); }
+  #scriptSearchInfo {
+    font-size: 10px;
+    color: var(--muted);
+    min-width: 40px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+  }
 
   /* resize handle */
   #resizeHandle {
@@ -342,7 +388,17 @@
 <div id="main">
   <!-- Script panel -->
   <div id="scriptPanel">
-    <div class="panel-title">스크립트</div>
+    <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span>스크립트</span>
+      <button class="btn" id="scriptSearchToggle" style="font-size:10px;padding:2px 6px;height:20px">🔍</button>
+    </div>
+    <div id="scriptSearchBar" style="display:none">
+      <input type="text" id="scriptSearchInput" placeholder="스크립트 검색...">
+      <span id="scriptSearchInfo">0 / 0</span>
+      <button class="btn" id="scriptPrevHit" style="padding:2px 6px">▲</button>
+      <button class="btn" id="scriptNextHit" style="padding:2px 6px">▼</button>
+      <button class="btn" id="scriptCloseSearch" style="padding:2px 6px">✕</button>
+    </div>
     <div id="uploadArea">
       <input type="file" id="fileInput" accept=".docx,.txt" style="display:none">
       <button class="btn" id="uploadBtn">📂 파일 불러오기 &nbsp;<span style="color:var(--muted);font-size:10px;">docx · txt</span></button>
@@ -411,6 +467,16 @@ const resizeHandle  = document.getElementById('resizeHandle');
 scriptInput.value = state.text;
 renderPrompter();
 applyStyles();
+
+// ── ORIENTATION 변경 시 스크롤 위치 유지 ──
+window.addEventListener('orientationchange', () => {
+  const ratio = getScrollRatio();
+  setTimeout(() => setScrollRatio(ratio), 300);
+});
+window.addEventListener('resize', () => {
+  const ratio = getScrollRatio();
+  requestAnimationFrame(() => setScrollRatio(ratio));
+});
 
 // ── RENDER ──
 function renderPrompter(keepRatio) {
@@ -610,6 +676,78 @@ document.addEventListener('keydown', e => {
     if (searchBar.classList.contains('open')) closeSearch.click();
   }
 });
+
+// ── SCRIPT PANEL SEARCH ──
+const scriptSearchToggle  = document.getElementById('scriptSearchToggle');
+const scriptSearchBar     = document.getElementById('scriptSearchBar');
+const scriptSearchInput   = document.getElementById('scriptSearchInput');
+const scriptSearchInfo    = document.getElementById('scriptSearchInfo');
+const scriptPrevHit       = document.getElementById('scriptPrevHit');
+const scriptNextHit       = document.getElementById('scriptNextHit');
+const scriptCloseSearch   = document.getElementById('scriptCloseSearch');
+
+let scriptHits = [], scriptCurrentHit = -1;
+
+scriptSearchToggle.addEventListener('click', () => {
+  const open = scriptSearchBar.style.display === 'none' || scriptSearchBar.style.display === '';
+  scriptSearchBar.style.display = open ? 'flex' : 'none';
+  if (open) { scriptSearchInput.focus(); scriptSearchInput.select(); }
+  else { clearScriptSearch(); }
+});
+
+scriptCloseSearch.addEventListener('click', () => {
+  scriptSearchBar.style.display = 'none';
+  clearScriptSearch();
+});
+
+scriptSearchInput.addEventListener('input', () => {
+  runScriptSearch(scriptSearchInput.value);
+});
+
+function runScriptSearch(query) {
+  clearScriptHighlights();
+  scriptHits = []; scriptCurrentHit = -1;
+  if (!query) { scriptSearchInfo.textContent = '0 / 0'; return; }
+
+  const text = scriptInput.value;
+  const lower = text.toLowerCase();
+  const qLower = query.toLowerCase();
+  const positions = [];
+  let pos = 0;
+  while ((pos = lower.indexOf(qLower, pos)) !== -1) {
+    positions.push(pos);
+    pos += qLower.length;
+  }
+  scriptHits = positions;
+  scriptSearchInfo.textContent = `0 / ${scriptHits.length}`;
+  if (scriptHits.length > 0) jumpScriptHit(0);
+}
+
+function jumpScriptHit(i) {
+  if (!scriptHits.length) return;
+  scriptCurrentHit = (i + scriptHits.length) % scriptHits.length;
+  scriptSearchInfo.textContent = `${scriptCurrentHit + 1} / ${scriptHits.length}`;
+  const pos = scriptHits[scriptCurrentHit];
+  const query = scriptSearchInput.value;
+  scriptInput.focus();
+  scriptInput.setSelectionRange(pos, pos + query.length);
+  // 해당 위치로 스크롤
+  const lineHeight = parseInt(getComputedStyle(scriptInput).lineHeight) || 22;
+  const lines = scriptInput.value.substring(0, pos).split('\n').length - 1;
+  scriptInput.scrollTop = lines * lineHeight - scriptInput.clientHeight / 2;
+}
+
+function clearScriptSearch() {
+  scriptHits = []; scriptCurrentHit = -1;
+  scriptSearchInput.value = '';
+  scriptSearchInfo.textContent = '0 / 0';
+}
+function clearScriptHighlights() {
+  // textarea는 highlight 불필요, 선택으로 표시
+}
+
+scriptPrevHit.addEventListener('click', () => jumpScriptHit(scriptCurrentHit - 1));
+scriptNextHit.addEventListener('click', () => jumpScriptHit(scriptCurrentHit + 1));
 
 // ── RESIZE PANEL ──
 let resizing = false, startX = 0, startW = 0;
