@@ -260,7 +260,6 @@
     position: relative;
     background: var(--bg);
     min-width: 0;
-    touch-action: none;
   }
 
   /* 핀치/드래그 뷰 컨테이너 */
@@ -271,7 +270,6 @@
     height: 100%;
     transform-origin: 0 0;
     will-change: transform;
-    overflow: hidden; /* 내부 스크롤은 #prompter가 담당 */
   }
 
   #prompter {
@@ -280,6 +278,7 @@
     overflow-x: hidden;
     padding: 60px 0;
     scrollbar-width: none;
+    touch-action: pan-y;
   }
   #prompter::-webkit-scrollbar { display: none; }
 
@@ -714,10 +713,11 @@ function getTouchMid(t) {
   return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
 }
 
+// 핀치(2손가락)만 가로채고, 1손가락은 #prompter 기본 스크롤에 맡김
 prompterWrap.addEventListener('touchstart', e => {
   if (resizing) return;
-  e.preventDefault();
   if (e.touches.length === 2) {
+    e.preventDefault(); // 핀치만 기본동작 차단
     touch.pinching = true;
     touch.dragging = false;
     touch.startDist = getTouchDist(e.touches);
@@ -725,7 +725,8 @@ prompterWrap.addEventListener('touchstart', e => {
     const mid = getTouchMid(e.touches);
     touch.midX = mid.x; touch.midY = mid.y;
     touch.startPanX = state.panX; touch.startPanY = state.panY;
-  } else if (e.touches.length === 1) {
+  } else if (e.touches.length === 1 && state.zoom > 1.05) {
+    // 줌된 상태에서만 팬 드래그 활성화
     touch.dragging = true;
     touch.pinching = false;
     touch.startX = e.touches[0].clientX;
@@ -737,16 +738,16 @@ prompterWrap.addEventListener('touchstart', e => {
 
 prompterWrap.addEventListener('touchmove', e => {
   if (resizing) return;
-  e.preventDefault();
   if (touch.pinching && e.touches.length === 2) {
+    e.preventDefault();
     const dist  = getTouchDist(e.touches);
     const mid   = getTouchMid(e.touches);
     const newZoom = touch.startZoom * (dist / touch.startDist);
-    // pan도 핀치 시작점 기준 이동량 반영
     state.panX = touch.startPanX + (mid.x - touch.midX);
     state.panY = touch.startPanY + (mid.y - touch.midY);
     applyZoom(newZoom, mid.x, mid.y);
-  } else if (touch.dragging && e.touches.length === 1) {
+  } else if (touch.dragging && e.touches.length === 1 && state.zoom > 1.05) {
+    e.preventDefault();
     const dx = e.touches[0].clientX - touch.startX;
     const dy = e.touches[0].clientY - touch.startY;
     state.panX = touch.startPanX + dx;
