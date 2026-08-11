@@ -247,12 +247,15 @@
     padding: 14px;
     font-family: 'Noto Sans KR', sans-serif;
     white-space: pre-wrap;
+    word-wrap: break-word;
     word-break: break-word;
     color: transparent;
     pointer-events: none;
     overflow-y: auto;
+    overflow-x: hidden;
     scrollbar-width: none;
     z-index: 1;
+    box-sizing: border-box;
   }
   #scriptHighlight::-webkit-scrollbar { display: none; }
   #scriptHighlight mark {
@@ -595,11 +598,13 @@ boldBtn.addEventListener('click', () => {
 
 scriptInput.addEventListener('input', () => {
   state.text = scriptInput.value;
-  // 현재 프롬프터 스크롤 위치를 유지하며 반영
-  const ratio = getScrollRatio();
   prompterContent.innerHTML = escapeAndMark(state.text);
+  // 커서 위치 비율로 프롬프터 스크롤 이동
+  const cursorPos = scriptInput.selectionStart || 0;
+  const textLen = scriptInput.value.length || 1;
+  const cursorRatio = cursorPos / textLen;
   requestAnimationFrame(() => {
-    setScrollRatio(ratio);
+    setScrollRatio(cursorRatio);
     updatePosBar();
   });
   // 검색 중이면 오버레이도 갱신
@@ -785,18 +790,15 @@ function jumpScriptHit(i) {
   scriptCurrentHit = (i + scriptHits.length) % scriptHits.length;
   scriptSearchInfo.textContent = `${scriptCurrentHit + 1} / ${scriptHits.length}`;
   renderScriptHighlight(scriptSearchInput.value, scriptCurrentHit);
-  scrollScriptToHit(scriptCurrentHit);
-}
-
-function scrollScriptToHit(i) {
-  // 오버레이 스크롤 위치 계산 (focus/selection 없이)
-  const pos = scriptHits[i];
-  const textBefore = scriptInput.value.substring(0, pos);
-  const lines = textBefore.split('\n').length - 1;
-  const lineH = parseFloat(getComputedStyle(scriptInput).lineHeight) || 22;
-  const target = lines * lineH - scriptInput.clientHeight / 2 + lineH;
-  scriptInput.scrollTop = Math.max(0, target);
-  scriptHighlight.scrollTop = scriptInput.scrollTop;
+  // 오버레이의 현재 mark 위치로 스크롤
+  requestAnimationFrame(() => {
+    const currentMark = scriptHighlight.querySelector('mark.current');
+    if (!currentMark) return;
+    const markTop = currentMark.offsetTop;
+    const target = markTop - scriptHighlight.clientHeight / 2 + currentMark.offsetHeight;
+    scriptHighlight.scrollTop = Math.max(0, target);
+    scriptInput.scrollTop = scriptHighlight.scrollTop;
+  });
 }
 
 function renderScriptHighlight(query, currentIdx) {
@@ -817,8 +819,9 @@ function escapeForOverlay(text) {
   return text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\n/g, '<br>');
+    .replace(/>/g, '&gt;');
+  // 
+은 white-space:pre-wrap이 처리
 }
 
 
