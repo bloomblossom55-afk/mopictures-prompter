@@ -66,8 +66,16 @@
     text-align: center;
     outline: none;
     padding: 0 2px;
+    cursor: ew-resize;
+    user-select: none;
+    -webkit-user-select: none;
   }
-  .num-input:focus { border-color: var(--accent); }
+  .num-input:focus {
+    border-color: var(--accent);
+    cursor: text;
+    user-select: auto;
+    -webkit-user-select: auto;
+  }
   .num-unit { font-size: 10px; color: var(--muted); }
 
   #topbar .logo {
@@ -589,6 +597,77 @@ lineInput.addEventListener('change', () => {
   state.lineHeight = v;
   applyStyles(getScrollRatio());
 });
+
+// ── 드래그로 수치 조절 ──
+function makeDraggableInput(el, opts) {
+  const { min, max, step, onUpdate } = opts;
+  let dragging = false;
+  let startX = 0, startVal = 0;
+  let moved = false;
+  const THRESHOLD = 3; // 드래그로 인식할 최소 px
+
+  function clamp(v) {
+    const s = step || 1;
+    return Math.min(max, Math.max(min, Math.round(v / s) * s));
+  }
+  function applyVal(v) {
+    const clamped = clamp(v);
+    el.value = Number.isInteger(step) ? clamped : parseFloat(clamped.toFixed(1));
+    onUpdate(clamped);
+  }
+
+  // 마우스
+  el.addEventListener('mousedown', e => {
+    if (document.activeElement === el) return; // 포커스 상태면 일반 입력
+    startX = e.clientX;
+    startVal = parseFloat(el.value) || min;
+    dragging = false; moved = false;
+    e.preventDefault();
+
+    function onMove(e) {
+      const dx = e.clientX - startX;
+      if (!dragging && Math.abs(dx) >= THRESHOLD) dragging = true;
+      if (!dragging) return;
+      moved = true;
+      applyVal(startVal + dx * (step || 1));
+    }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      if (!moved) el.focus(); // 드래그 없으면 포커스
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  // 터치
+  el.addEventListener('touchstart', e => {
+    if (document.activeElement === el) return;
+    startX = e.touches[0].clientX;
+    startVal = parseFloat(el.value) || min;
+    dragging = false; moved = false;
+
+    function onMove(e) {
+      const dx = e.touches[0].clientX - startX;
+      if (!dragging && Math.abs(dx) >= THRESHOLD) { dragging = true; }
+      if (!dragging) return;
+      e.preventDefault();
+      moved = true;
+      applyVal(startVal + dx * (step || 1));
+    }
+    function onEnd() {
+      el.removeEventListener('touchmove', onMove);
+      el.removeEventListener('touchend', onEnd);
+      if (!moved) el.focus();
+    }
+    el.addEventListener('touchmove', onMove, { passive: false });
+    el.addEventListener('touchend', onEnd);
+  }, { passive: true });
+}
+
+makeDraggableInput(fontInput,  { min: 10,  max: 200, step: 1,   onUpdate: v => { state.fontSize  = v; applyStyles(getScrollRatio()); } });
+makeDraggableInput(widthInput, { min: 20,  max: 100, step: 1,   onUpdate: v => { state.width     = v; applyStyles(getScrollRatio()); } });
+makeDraggableInput(lineInput,  { min: 1.0, max: 4.0, step: 0.1, onUpdate: v => { state.lineHeight = v; applyStyles(getScrollRatio()); } });
 
 boldBtn.addEventListener('click', () => {
   state.bold = !state.bold;
