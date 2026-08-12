@@ -5,43 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>MO PROMPTER</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
 :root {
-  --bg:       #080808;
-  --surface:  #101010;
-  --surface2: #161616;
-  --border:   #1e1e1e;
-  --border2:  #2a2a2a;
-  --text:     #e8e8e8;
-  --muted:    #444;
-  --muted2:   #666;
-  --accent:   #c8f560;   /* 라임 그린: 방송/촬영 현장의 큐 사인 느낌 */
-  --accent-d: #9abf3a;
-  --red:      #ff4d4d;
-  --tab-h:    52px;
+  --bg:      #080808;
+  --surface: #101010;
+  --surf2:   #161616;
+  --border:  #1e1e1e;
+  --bord2:   #2a2a2a;
+  --text:    #e8e8e8;
+  --muted:   #444;
+  --muted2:  #666;
+  --accent:  #c8f560;
+  --red:     #ff4d4d;
+  --tab-h:   48px;
+  --tool-h:  40px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-html, body {
-  height: 100%; max-height: 100%; overflow: hidden;
-}
+html { height: 100%; }
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', 'Noto Sans KR', sans-serif;
   height: 100dvh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
   position: fixed;
-  width: 100%; top: 0; left: 0;
+  inset: 0;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ══════════════════════════════
-   TAB BAR
-══════════════════════════════ */
+/* ── TAB BAR ── */
 #tabBar {
   height: var(--tab-h);
   min-height: var(--tab-h);
@@ -50,499 +47,249 @@ body {
   display: flex;
   align-items: stretch;
   flex-shrink: 0;
-  position: relative;
-  z-index: 10;
+  z-index: 100;
 }
-
 .tab-logo {
-  display: flex;
-  align-items: center;
-  padding: 0 16px 0 14px;
+  display: flex; align-items: center;
+  padding: 0 14px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent);
-  letter-spacing: 3px;
+  font-size: 11px; font-weight: 600;
+  color: var(--accent); letter-spacing: 3px;
   border-right: 1px solid var(--border);
-  white-space: nowrap;
   flex-shrink: 0;
 }
-
 .tab-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted2);
-  letter-spacing: 0.3px;
-  position: relative;
-  transition: color .2s;
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  background: none; border: none; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: var(--muted2);
+  font-family: inherit; position: relative; transition: color .15s;
 }
-.tab-btn .tab-icon { font-size: 15px; }
 .tab-btn.active { color: var(--text); }
 .tab-btn.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 12%; right: 12%;
-  height: 2px;
-  background: var(--accent);
-  border-radius: 2px 2px 0 0;
+  content: ''; position: absolute; bottom: 0; left: 15%; right: 15%;
+  height: 2px; background: var(--accent); border-radius: 2px 2px 0 0;
 }
-.tab-btn:not(.active):hover { color: var(--muted2); opacity: .8; }
 
-/* ══════════════════════════════
-   PAGES
-══════════════════════════════ */
-#pages {
+/* ── WRAPPER: 두 탭이 flex-row로 나란히, JS로 translateX ── */
+#slideWrap {
   flex: 1;
+  display: flex;
+  flex-direction: row;
+  width: 200%;          /* 탭 2개 = 200% */
   overflow: hidden;
   min-height: 0;
-  position: relative;
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
 }
-.page {
-  position: absolute;
-  inset: 0;
-  display: none;
+#slideWrap.show-prompt { transform: translateX(-50%); }
+
+/* ── EDIT PAGE ── */
+#editPage {
+  width: 50%;
+  flex-shrink: 0;
+  display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-.page.active { display: flex; }
-
-/* ══════════════════════════════
-   PAGE 1: 편집
-══════════════════════════════ */
-#editPage {
   background: var(--bg);
 }
 
-/* 편집 툴바 */
+/* 툴바 */
 #editToolbar {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 0 12px;
-  height: 44px;
-  min-height: 44px;
+  height: var(--tool-h);
+  min-height: var(--tool-h);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 0;
+  padding: 0 10px;
   flex-shrink: 0;
   overflow: hidden;
 }
-
 .tb-group {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 0 10px;
+  display: flex; align-items: center; gap: 4px;
+  padding: 0 8px; height: 100%;
   border-right: 1px solid var(--border);
-  height: 100%;
 }
-.tb-group:first-child { padding-left: 0; }
-.tb-group:last-child  { border-right: none; margin-left: auto; padding-right: 0; }
+.tb-group:last-child { border-right: none; margin-left: auto; padding-right: 0; }
+.tb-label { font-size: 9px; color: var(--muted); white-space: nowrap; letter-spacing: .5px; }
 
-.tb-label {
-  font-size: 10px;
-  color: var(--muted);
-  white-space: nowrap;
-  letter-spacing: 0.5px;
-}
-
-/* 드래그 수치 입력 */
 .num-input {
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 5px;
-  color: var(--accent);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 600;
-  width: 44px;
-  height: 26px;
-  text-align: center;
-  outline: none;
-  padding: 0;
-  cursor: ew-resize;
-  user-select: none;
-  -webkit-user-select: none;
-  transition: border-color .15s;
+  background: var(--surf2); border: 1px solid var(--bord2);
+  border-radius: 4px; color: var(--accent);
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+  width: 42px; height: 24px; text-align: center; outline: none; padding: 0;
+  cursor: ew-resize; user-select: none; -webkit-user-select: none;
 }
 .num-input:focus { border-color: var(--accent); cursor: text; user-select: auto; -webkit-user-select: auto; }
-.num-unit { font-size: 10px; color: var(--muted); }
+.num-unit { font-size: 9px; color: var(--muted); }
 
 .tb-btn {
-  background: none;
-  border: 1px solid var(--border2);
-  color: var(--muted2);
-  border-radius: 5px;
-  padding: 0 9px;
-  height: 26px;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  transition: all .15s;
+  background: none; border: 1px solid var(--bord2); color: var(--muted2);
+  border-radius: 4px; padding: 0 8px; height: 24px; font-size: 11px;
+  cursor: pointer; white-space: nowrap; font-family: inherit;
+  display: inline-flex; align-items: center; gap: 3px; transition: all .15s;
 }
-.tb-btn:hover, .tb-btn:active { border-color: var(--accent); color: var(--accent); }
+.tb-btn:hover { border-color: var(--accent); color: var(--accent); }
 .tb-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
-#boldBtn { font-weight: 700; font-size: 13px; min-width: 26px; padding: 0 6px; }
+#boldBtn { font-weight: 700; font-size: 13px; padding: 0 6px; }
 
-/* 편집 본체: 좌우 분할 */
-#editBody {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  min-height: 0;
-}
-
-/* 스크립트 편집 영역 */
-#scriptArea {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-width: 0;
-}
-
+/* 스크립트 검색바 */
 #scriptSearchBar {
-  display: none;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  background: var(--surface2);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+  display: none; align-items: center; gap: 5px;
+  padding: 5px 10px; background: var(--surf2);
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
 #scriptSearchBar.open { display: flex; }
 #scriptSearchInput {
-  flex: 1;
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  border-radius: 5px;
-  color: var(--text);
-  font-size: 13px;
-  padding: 4px 9px;
-  outline: none;
-  font-family: inherit;
-  min-width: 0;
+  flex: 1; background: var(--bg); border: 1px solid var(--bord2);
+  border-radius: 4px; color: var(--text); font-size: 13px;
+  padding: 3px 8px; outline: none; font-family: inherit; min-width: 0;
 }
 #scriptSearchInput:focus { border-color: var(--accent); }
-#scriptSearchInfo {
-  font-size: 10px;
-  color: var(--muted);
-  min-width: 40px;
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  white-space: nowrap;
-}
-.ss-btn {
-  background: none;
-  border: 1px solid var(--border2);
-  color: var(--muted2);
-  border-radius: 4px;
-  padding: 3px 7px;
-  font-size: 11px;
-  cursor: pointer;
-  height: 24px;
-  display: inline-flex; align-items: center;
-}
+#ssi { font-size: 10px; color: var(--muted); min-width: 38px; text-align: center; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+.ss-btn { background: none; border: 1px solid var(--bord2); color: var(--muted2); border-radius: 3px; padding: 2px 6px; font-size: 10px; cursor: pointer; }
 .ss-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-/* 하이라이트 오버레이 래퍼 */
-#scriptHighlightWrap {
-  flex: 1;
-  position: relative;
-  min-height: 0;
-  overflow: hidden;
-}
+/* 편집 본체 */
+#editBody { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+
+/* 하이라이트 오버레이 */
+#scriptHighlightWrap { flex: 1; position: relative; min-height: 0; overflow: hidden; }
 #scriptHighlight {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  font-size: 14px;
-  line-height: 1.8;
-  padding: 16px;
+  position: absolute; inset: 0;
+  font-size: 14px; line-height: 1.8; padding: 14px;
   font-family: 'Noto Sans KR', sans-serif;
-  white-space: pre-wrap;
-  word-break: break-word;
-  color: transparent;
-  pointer-events: none;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  z-index: 1;
-  box-sizing: border-box;
+  white-space: pre-wrap; word-break: break-word;
+  color: transparent; pointer-events: none;
+  overflow-y: auto; overflow-x: hidden;
+  scrollbar-width: none; z-index: 1;
 }
 #scriptHighlight::-webkit-scrollbar { display: none; }
-#scriptHighlight mark {
-  background: rgba(200,245,96,.3);
-  color: transparent;
-  border-radius: 2px;
-}
-#scriptHighlight mark.current { background: var(--accent); }
-
+#scriptHighlight mark { background: rgba(200,245,96,.3); color: transparent; border-radius: 2px; }
+#scriptHighlight mark.cur { background: var(--accent); }
 #scriptInput {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: transparent;
-  border: none;
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.8;
-  padding: 16px;
-  resize: none;
-  outline: none;
+  position: absolute; inset: 0;
+  background: transparent; border: none; color: var(--text);
+  font-size: 14px; line-height: 1.8; padding: 14px;
+  resize: none; outline: none;
   font-family: 'Noto Sans KR', sans-serif;
-  z-index: 2;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border2) transparent;
+  z-index: 2; overflow-y: auto; overflow-x: hidden;
+  scrollbar-width: thin; scrollbar-color: var(--bord2) transparent;
 }
 
-/* 우측 미리보기 패널 */
+/* 미리보기 패널 */
+#resizeHandle { width: 4px; cursor: col-resize; background: transparent; flex-shrink: 0; touch-action: none; }
+#resizeHandle:hover, #resizeHandle.dragging { background: var(--accent); opacity: .4; }
 #previewPanel {
-  width: 260px;
-  min-width: 200px;
-  border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  background: var(--surface);
-  flex-shrink: 0;
+  width: 240px; min-width: 180px; border-left: 1px solid var(--border);
+  display: flex; flex-direction: column; background: var(--surface); flex-shrink: 0;
 }
 #previewPanel.hidden { display: none; }
-
 #previewHeader {
-  padding: 8px 12px;
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--muted);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding: 6px 10px; font-size: 9px; letter-spacing: 2px;
+  color: var(--muted); text-transform: uppercase;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
 }
-#previewHeader span { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 9px; }
-
+#previewLive { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 9px; }
 #previewContent {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 12px;
-  scrollbar-width: none;
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 12px; scrollbar-width: none;
   font-family: 'Noto Sans KR', sans-serif;
-  color: var(--text);
-  line-height: 1.7;
-  font-size: 11px;
-  word-break: break-word;
-  opacity: .7;
+  color: var(--text); line-height: 1.7; font-size: 11px;
+  word-break: break-word; opacity: .75;
 }
 #previewContent::-webkit-scrollbar { display: none; }
-
-/* 업로드 영역 */
 #uploadBar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 10px; border-top: 1px solid var(--border); flex-shrink: 0;
 }
-#uploadBar .tb-btn { flex: 1; justify-content: center; }
-#uploadStatus {
-  font-size: 10px;
-  color: var(--accent);
-  font-family: 'JetBrains Mono', monospace;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
-}
+#uploadBtn2 { flex: 1; justify-content: center; font-size: 11px; }
+#uploadStatus { font-size: 10px; color: var(--accent); font-family: 'JetBrains Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
 #uploadStatus.err { color: var(--red); }
 
-/* resize handle */
-#resizeHandle {
-  width: 4px;
-  cursor: col-resize;
-  background: transparent;
-  flex-shrink: 0;
-  touch-action: none;
-  transition: background .15s;
-}
-#resizeHandle:hover, #resizeHandle.dragging { background: var(--accent); opacity: .4; }
-
-/* ══════════════════════════════
-   PAGE 2: 프롬프터
-══════════════════════════════ */
+/* ── PROMPT PAGE ── */
 #promptPage {
-  background: #000;
+  width: 50%;
+  flex-shrink: 0;
   position: relative;
+  background: #000;
+  overflow: hidden;
 }
-
 #prompter {
-  position: absolute;
-  inset: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 80px 0 120px;
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 80px 0 100px;
   scrollbar-width: none;
   touch-action: pan-y;
 }
 #prompter::-webkit-scrollbar { display: none; }
-
 #prompterContent {
   margin: 0 auto;
-  color: #fff;
+  color: #fff !important;
   word-break: break-word;
-  line-height: 1.7;
+  display: block;
 }
+#prompterContent mark.hit { background: rgba(200,245,96,.25); color: var(--accent); border-radius: 2px; }
+#prompterContent mark.hit.cur { background: var(--accent); color: #000; }
 
-/* 프롬프터 검색 하이라이트 */
-#prompterContent mark.hit {
-  background: rgba(200,245,96,.25);
-  color: var(--accent);
-  border-radius: 2px;
-}
-#prompterContent mark.hit.current {
-  background: var(--accent);
-  color: #000;
-}
-
-/* 프롬프터 오버레이 컨트롤 */
+/* 프롬프터 오버레이 */
 #promptOverlay {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: linear-gradient(to bottom, rgba(0,0,0,.8) 0%, transparent 100%);
+  position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+  padding: 10px 12px;
+  display: flex; align-items: center; gap: 6px;
+  background: linear-gradient(to bottom, rgba(0,0,0,.85), transparent);
+  opacity: 0; transition: opacity .25s;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity .3s;
-  z-index: 5;
 }
-#promptPage:hover #promptOverlay,
-#promptPage.show-overlay #promptOverlay {
-  opacity: 1;
-  pointer-events: auto;
-}
+#promptPage.show-ui #promptOverlay { opacity: 1; pointer-events: auto; }
 
-/* 프롬프터 검색 */
 #promptSearchBar {
-  display: none;
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: rgba(0,0,0,.9);
-  border-bottom: 1px solid var(--border);
-  z-index: 10;
-  backdrop-filter: blur(8px);
+  display: none; position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+  align-items: center; gap: 5px; padding: 8px 10px;
+  background: rgba(0,0,0,.92); border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(6px);
 }
 #promptSearchBar.open { display: flex; }
 #promptSearchInput {
-  flex: 1;
-  background: rgba(255,255,255,.08);
-  border: 1px solid var(--border2);
-  border-radius: 5px;
-  color: var(--text);
-  font-size: 14px;
-  padding: 5px 10px;
-  outline: none;
-  font-family: inherit;
+  flex: 1; background: rgba(255,255,255,.08); border: 1px solid var(--bord2);
+  border-radius: 4px; color: #fff; font-size: 14px;
+  padding: 4px 8px; outline: none; font-family: inherit;
 }
 #promptSearchInput:focus { border-color: var(--accent); }
-#promptSearchInfo {
-  font-size: 11px;
-  color: var(--muted2);
-  min-width: 46px;
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-/* 프롬프터 탭 전용 버튼 */
+#psi { font-size: 10px; color: var(--muted2); min-width: 40px; text-align: center; font-family: 'JetBrains Mono', monospace; }
 .p-btn {
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.12);
-  color: rgba(255,255,255,.7);
-  border-radius: 6px;
-  padding: 5px 11px;
-  font-size: 12px;
-  cursor: pointer;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.75); border-radius: 4px; padding: 4px 10px;
+  font-size: 11px; cursor: pointer; font-family: inherit;
+  display: inline-flex; align-items: center; gap: 3px; transition: all .15s;
   white-space: nowrap;
-  font-family: inherit;
-  display: inline-flex; align-items: center; gap: 4px;
-  transition: all .15s;
-  pointer-events: auto;
 }
-.p-btn:hover { background: rgba(255,255,255,.13); color: #fff; }
+.p-btn:hover { background: rgba(255,255,255,.15); color: #fff; }
 .p-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
-/* 스크롤 위치 바 */
-#posBar {
-  position: absolute;
-  right: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: rgba(255,255,255,.05);
-  z-index: 4;
-}
-#posThumb {
-  width: 3px;
-  background: var(--accent);
-  border-radius: 2px;
-  position: absolute;
-  top: 0;
-  min-height: 30px;
-  opacity: .6;
-}
+/* 스크롤 바 */
+#posBar { position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background: rgba(255,255,255,.05); z-index: 5; pointer-events: none; }
+#posThumb { width: 3px; background: var(--accent); border-radius: 2px; position: absolute; top: 0; min-height: 24px; opacity: .5; }
 
-/* 현재 위치 표시선 */
-#cursorLine {
-  position: absolute;
-  top: 50%;
-  left: 0; right: 6px;
-  height: 1px;
-  background: rgba(200,245,96,.15);
-  pointer-events: none;
-  z-index: 3;
-  display: none;
+/* 가이드선 */
+#guideLine {
+  display: none; position: absolute; top: 50%; left: 0; right: 4px;
+  height: 1px; background: rgba(200,245,96,.2); pointer-events: none; z-index: 4;
 }
-#cursorLine.show { display: block; }
+#guideLine.show { display: block; }
 </style>
 </head>
 <body>
 
-<!-- TAB BAR -->
 <div id="tabBar">
   <div class="tab-logo">MO</div>
-  <button class="tab-btn active" id="tabEdit" onclick="switchTab('edit')">
-    <span class="tab-icon">✏️</span> 편집
-  </button>
-  <button class="tab-btn" id="tabPrompt" onclick="switchTab('prompt')">
-    <span class="tab-icon">📺</span> 프롬프터
-  </button>
+  <button class="tab-btn active" id="tabEdit" onclick="showTab('edit')">✏️ 편집</button>
+  <button class="tab-btn" id="tabPrompt" onclick="showTab('prompt')">📺 프롬프터</button>
 </div>
 
-<!-- PAGES -->
-<div id="pages">
+<div id="slideWrap">
 
-  <!-- ── PAGE 1: 편집 ── -->
-  <div class="page active" id="editPage">
-
-    <!-- 툴바 -->
+  <!-- EDIT PAGE -->
+  <div id="editPage">
     <div id="editToolbar">
       <div class="tb-group">
         <span class="tb-label">글자</span>
@@ -556,588 +303,381 @@ body {
       </div>
       <div class="tb-group">
         <span class="tb-label">줄간격</span>
-        <input class="num-input" type="number" id="lineInput" min="1" max="4" step="0.1" value="1.7" style="width:40px">
+        <input class="num-input" type="number" id="lineInput" min="1" max="4" step="0.1" value="1.7" style="width:38px">
       </div>
       <div class="tb-group">
         <button class="tb-btn" id="boldBtn">B</button>
       </div>
-      <div class="tb-group" style="margin-left:auto; border-right:none; padding-right:0;">
+      <div class="tb-group">
         <button class="tb-btn" id="scriptSearchToggle">🔍</button>
-        <button class="tb-btn" id="previewToggle">미리보기</button>
+        <button class="tb-btn active" id="previewToggle">미리보기</button>
       </div>
     </div>
 
-    <!-- 스크립트 검색바 -->
     <div id="scriptSearchBar">
-      <input type="text" id="scriptSearchInput" placeholder="스크립트에서 검색...">
-      <span id="scriptSearchInfo">0 / 0</span>
-      <button class="ss-btn" id="scriptPrevHit">▲</button>
-      <button class="ss-btn" id="scriptNextHit">▼</button>
-      <button class="ss-btn" id="scriptCloseSearch">✕</button>
+      <input type="text" id="scriptSearchInput" placeholder="스크립트 검색...">
+      <span id="ssi">0 / 0</span>
+      <button class="ss-btn" id="sPrev">▲</button>
+      <button class="ss-btn" id="sNext">▼</button>
+      <button class="ss-btn" id="sClose">✕</button>
     </div>
 
-    <!-- 편집 본체 -->
     <div id="editBody">
-      <div id="scriptArea">
-        <div id="scriptHighlightWrap">
-          <div id="scriptHighlight"></div>
-          <textarea id="scriptInput" spellcheck="false" placeholder="스크립트를 입력하거나 파일을 불러오세요.
-
-오프닝, 작품설명, 엔딩, [챕터 1] 등의 단락 구분이 자동으로 적용됩니다."></textarea>
-        </div>
+      <div id="scriptHighlightWrap">
+        <div id="scriptHighlight"></div>
+        <textarea id="scriptInput" spellcheck="false" placeholder="스크립트를 입력하거나 파일을 불러오세요."></textarea>
       </div>
-
       <div id="resizeHandle"></div>
-
-      <!-- 미리보기 패널 -->
       <div id="previewPanel">
         <div id="previewHeader">
-          <span>PREVIEW</span>
-          <span id="previewSync">● LIVE</span>
+          <span>PREVIEW</span><span id="previewLive">● LIVE</span>
         </div>
         <div id="previewContent"></div>
         <div id="uploadBar">
           <input type="file" id="fileInput" accept=".docx,.txt" style="display:none">
-          <button class="tb-btn" id="uploadBtn">📂 파일 불러오기</button>
+          <button class="tb-btn" id="uploadBtn2">📂 파일 불러오기</button>
           <div id="uploadStatus"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ── PAGE 2: 프롬프터 ── -->
-  <div class="page" id="promptPage">
-    <!-- 검색바 -->
+  <!-- PROMPT PAGE -->
+  <div id="promptPage">
     <div id="promptSearchBar">
-      <input type="text" id="promptSearchInput" placeholder="검색어 입력...">
-      <span id="promptSearchInfo">0 / 0</span>
-      <button class="ss-btn" id="promptPrevHit">▲</button>
-      <button class="ss-btn" id="promptNextHit">▼</button>
-      <button class="ss-btn" id="promptCloseSearch">✕</button>
+      <input type="text" id="promptSearchInput" placeholder="검색어...">
+      <span id="psi">0 / 0</span>
+      <button class="ss-btn" id="pPrev">▲</button>
+      <button class="ss-btn" id="pNext">▼</button>
+      <button class="ss-btn" id="pClose">✕</button>
     </div>
-
-    <!-- 오버레이 버튼 (탭 or 탭하면 나타남) -->
     <div id="promptOverlay">
-      <button class="p-btn" id="promptSearchBtn">🔍 검색</button>
-      <button class="p-btn" id="cursorLineBtn">가이드선</button>
-      <button class="p-btn" onclick="switchTab('edit')" style="margin-left:auto">✏️ 편집으로</button>
+      <button class="p-btn" id="pSearchBtn">🔍 검색</button>
+      <button class="p-btn" id="guideBtn">가이드선</button>
+      <button class="p-btn" onclick="showTab('edit')" style="margin-left:auto">✏️ 편집</button>
     </div>
-
     <div id="prompter">
       <div id="prompterContent"></div>
     </div>
-
-    <div id="cursorLine"></div>
+    <div id="guideLine"></div>
     <div id="posBar"><div id="posThumb"></div></div>
   </div>
 
 </div>
 
 <script>
-// ══════════════════════════════
-// STATE
-// ══════════════════════════════
-const state = {
-  text: `오프닝\n내레이터가 등장하며 인사합니다. 카메라를 바라보며 자연스럽게 시작하세요.\n\n[챕터 1]\n첫 번째 섹션의 내용이 여기에 들어갑니다. 스크립트를 입력하거나 파일을 불러오세요.\n\n작품설명\n이 작품에 대한 설명을 입력합니다. 배경, 의도, 메시지 등을 담을 수 있습니다.\n\n[챕터 2]\n두 번째 섹션입니다. 본문 내용을 자유롭게 작성하세요.\n\n엔딩\n마무리 멘트와 함께 자연스럽게 클로징합니다.`,
-  fontSize: 48,
-  width: 80,
-  lineHeight: 1.7,
-  bold: false,
-  currentTab: 'edit',
-  promptSearchHits: [],
-  promptCurrentHit: -1,
+// ── STATE ──
+const S = {
+  text: `오프닝\n환영합니다. 카메라를 바라보며 자연스럽게 시작하세요.\n\n[챕터 1]\n첫 번째 섹션 내용입니다. 스크립트를 입력하거나 파일을 불러오세요.\n\n작품설명\n이 작품에 대한 설명을 입력합니다.\n\n[챕터 2]\n두 번째 섹션입니다.\n\n엔딩\n마무리 멘트와 함께 클로징합니다.`,
+  fs: 48, w: 80, lh: 1.7, bold: false,
+  tab: 'edit',
+  sHits: [], sIdx: -1,
+  pHits: [], pIdx: -1,
 };
 
-// ══════════════════════════════
-// ELEMENTS
-// ══════════════════════════════
-const scriptInput       = document.getElementById('scriptInput');
-const scriptHighlight   = document.getElementById('scriptHighlight');
-const fontInput         = document.getElementById('fontInput');
-const widthInput        = document.getElementById('widthInput');
-const lineInput         = document.getElementById('lineInput');
-const boldBtn           = document.getElementById('boldBtn');
-const previewContent    = document.getElementById('previewContent');
-const previewPanel      = document.getElementById('previewPanel');
-const previewToggle     = document.getElementById('previewToggle');
-const prompterContent   = document.getElementById('prompterContent');
-const prompter          = document.getElementById('prompter');
-const promptPage        = document.getElementById('promptPage');
-const posThumb          = document.getElementById('posThumb');
-const cursorLine        = document.getElementById('cursorLine');
-const cursorLineBtn     = document.getElementById('cursorLineBtn');
+// ── ELEMENTS ──
+const scriptInput   = document.getElementById('scriptInput');
+const scriptHL      = document.getElementById('scriptHighlight');
+const fontInput     = document.getElementById('fontInput');
+const widthInput    = document.getElementById('widthInput');
+const lineInput     = document.getElementById('lineInput');
+const boldBtn       = document.getElementById('boldBtn');
+const previewPanel  = document.getElementById('previewPanel');
+const previewToggle = document.getElementById('previewToggle');
+const previewCont   = document.getElementById('previewContent');
+const prompter      = document.getElementById('prompter');
+const PC            = document.getElementById('prompterContent');
+const slideWrap     = document.getElementById('slideWrap');
+const promptPage    = document.getElementById('promptPage');
 
-// ══════════════════════════════
-// INIT
-// ══════════════════════════════
-scriptInput.value = state.text;
-renderAll();
-applySettings(0);
-previewToggle.classList.add('active');
+// ── INIT ──
+scriptInput.value = S.text;
+syncPrompter();
+syncPreview();
 
-// orientation / resize → 스크롤 위치 유지
-window.addEventListener('orientationchange', () => {
-  const r = getPromptRatio();
-  setTimeout(() => setPromptRatio(r), 300);
+// ── TAB ──
+function showTab(tab) {
+  S.tab = tab;
+  document.getElementById('tabEdit').classList.toggle('active', tab === 'edit');
+  document.getElementById('tabPrompt').classList.toggle('active', tab === 'prompt');
+  slideWrap.classList.toggle('show-prompt', tab === 'prompt');
+}
+
+// ── SYNC ──
+function toHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function syncPrompter() {
+  PC.innerHTML = toHtml(S.text);
+  PC.style.fontSize   = S.fs + 'px';
+  PC.style.width      = S.w + '%';
+  PC.style.lineHeight = S.lh;
+  PC.style.fontWeight = S.bold ? '700' : '400';
+}
+
+function syncPreview() {
+  previewCont.innerHTML = toHtml(S.text);
+}
+
+// ── SCRIPT INPUT ──
+scriptInput.addEventListener('input', () => {
+  S.text = scriptInput.value;
+  syncPrompter();
+  syncPreview();
+  const cr = (scriptInput.selectionStart||0) / Math.max(1, S.text.length);
+  requestAnimationFrame(() => { setRatio(cr); updateBar(); });
+  if (document.getElementById('scriptSearchInput').value)
+    renderScriptHL(document.getElementById('scriptSearchInput').value, S.sIdx);
 });
-window.addEventListener('resize', () => {
-  const r = getPromptRatio();
-  requestAnimationFrame(() => setPromptRatio(r));
-});
+scriptInput.addEventListener('scroll', () => { scriptHL.scrollTop = scriptInput.scrollTop; });
 
-// ══════════════════════════════
-// TAB SWITCH
-// ══════════════════════════════
-function switchTab(tab) {
-  state.currentTab = tab;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  if (tab === 'edit') {
-    document.getElementById('tabEdit').classList.add('active');
-    document.getElementById('editPage').classList.add('active');
-  } else {
-    document.getElementById('tabPrompt').classList.add('active');
-    document.getElementById('promptPage').classList.add('active');
-    // 탭 전환 후 레이아웃 확정되면 렌더
-    requestAnimationFrame(() => {
-      renderPrompter();
-      applySettings(0);
-      updatePosBar();
-    });
-  }
-}
-
-// ══════════════════════════════
-// RENDER
-// ══════════════════════════════
-function toHtml(text) {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\n/g, '<br>');
-}
-
-function renderAll() {
-  renderPreview();
-  renderPrompter();
-}
-
-function renderPreview() {
-  previewContent.innerHTML = toHtml(state.text);
-}
-
-function renderPrompter(keepRatio) {
-  const ratio = keepRatio !== undefined ? keepRatio : getPromptRatio();
-  prompterContent.innerHTML = toHtml(state.text);
-  requestAnimationFrame(() => { setPromptRatio(ratio); updatePosBar(); });
-}
-
-function applySettings(keepRatio) {
-  const ratio = keepRatio !== undefined ? keepRatio : getPromptRatio();
-  prompterContent.style.fontSize   = state.fontSize + 'px';
-  prompterContent.style.width      = state.width + '%';
-  prompterContent.style.lineHeight = state.lineHeight;
-  prompterContent.style.fontWeight = state.bold ? '700' : '400';
-  requestAnimationFrame(() => setPromptRatio(ratio));
-}
-
-// ══════════════════════════════
-// PROMPTER SCROLL
-// ══════════════════════════════
-function getPromptRatio() {
-  const max = prompter.scrollHeight - prompter.clientHeight;
-  return max <= 0 ? 0 : prompter.scrollTop / max;
-}
-function setPromptRatio(ratio) {
-  const max = prompter.scrollHeight - prompter.clientHeight;
-  prompter.scrollTop = ratio * max;
-}
-function updatePosBar() {
-  const ratio  = getPromptRatio();
-  const barH   = document.getElementById('posBar').clientHeight;
-  const thumbH = Math.max(30, barH * (prompter.clientHeight / Math.max(1, prompter.scrollHeight)));
-  posThumb.style.height = thumbH + 'px';
-  posThumb.style.top    = (ratio * (barH - thumbH)) + 'px';
-}
-prompter.addEventListener('scroll', updatePosBar);
-
-// 프롬프터 탭 탭하면 오버레이 표시
-promptPage.addEventListener('click', e => {
-  if (e.target.closest('#promptSearchBar') || e.target.closest('#promptOverlay')) return;
-  promptPage.classList.add('show-overlay');
-  clearTimeout(promptPage._ot);
-  promptPage._ot = setTimeout(() => promptPage.classList.remove('show-overlay'), 2500);
-});
-
-// ══════════════════════════════
-// SETTINGS CONTROLS
-// ══════════════════════════════
+// ── SETTINGS ──
 fontInput.addEventListener('change', () => {
-  const v = Math.min(200, Math.max(10, +fontInput.value || 48));
-  fontInput.value = v; state.fontSize = v; applySettings();
+  S.fs = Math.min(200, Math.max(10, +fontInput.value||48));
+  fontInput.value = S.fs; syncPrompter();
 });
 widthInput.addEventListener('change', () => {
-  const v = Math.min(100, Math.max(20, +widthInput.value || 80));
-  widthInput.value = v; state.width = v; applySettings();
+  S.w = Math.min(100, Math.max(20, +widthInput.value||80));
+  widthInput.value = S.w; syncPrompter();
 });
 lineInput.addEventListener('change', () => {
-  const v = parseFloat(Math.min(4, Math.max(1, +lineInput.value || 1.7)).toFixed(1));
-  lineInput.value = v; state.lineHeight = v; applySettings();
+  S.lh = parseFloat(Math.min(4,Math.max(1,+lineInput.value||1.7)).toFixed(1));
+  lineInput.value = S.lh; syncPrompter();
 });
 boldBtn.addEventListener('click', () => {
-  state.bold = !state.bold;
-  boldBtn.classList.toggle('active', state.bold);
-  applySettings();
+  S.bold = !S.bold; boldBtn.classList.toggle('active', S.bold); syncPrompter();
 });
 
-// 드래그로 수치 조절
-function makeDraggable(el, min, max, step, onUpdate) {
-  let dragging = false, moved = false, startX = 0, startVal = 0;
-  const THRESH = 4;
-  function clamp(v) {
-    const r = Math.round(v / step) * step;
-    return parseFloat(Math.min(max, Math.max(min, r)).toFixed(step < 1 ? 1 : 0));
-  }
-  function apply(v) { el.value = clamp(v); onUpdate(clamp(v)); }
-
+// 드래그 수치 조절
+function drag(el, min, max, step, cb) {
+  let sx,sv,moved;
+  const clamp = v => parseFloat(Math.min(max,Math.max(min,Math.round(v/step)*step)).toFixed(step<1?1:0));
   el.addEventListener('mousedown', e => {
-    if (document.activeElement === el) return;
-    startX = e.clientX; startVal = parseFloat(el.value); dragging = false; moved = false;
-    e.preventDefault();
-    const move = e => {
-      const dx = e.clientX - startX;
-      if (!dragging && Math.abs(dx) >= THRESH) dragging = true;
-      if (dragging) { moved = true; apply(startVal + dx * step); }
-    };
-    const up = () => {
-      document.removeEventListener('mousemove', move);
-      document.removeEventListener('mouseup', up);
-      if (!moved) el.focus();
-    };
-    document.addEventListener('mousemove', move);
-    document.addEventListener('mouseup', up);
+    if(document.activeElement===el) return;
+    sx=e.clientX; sv=parseFloat(el.value); moved=false; e.preventDefault();
+    const mm = e => { const d=e.clientX-sx; if(Math.abs(d)>3){moved=true; el.value=clamp(sv+d*step); cb(clamp(sv+d*step));} };
+    const mu = () => { document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); if(!moved)el.focus(); };
+    document.addEventListener('mousemove',mm); document.addEventListener('mouseup',mu);
   });
-
   el.addEventListener('touchstart', e => {
-    if (document.activeElement === el) return;
-    startX = e.touches[0].clientX; startVal = parseFloat(el.value); dragging = false; moved = false;
-    const move = e => {
-      const dx = e.touches[0].clientX - startX;
-      if (!dragging && Math.abs(dx) >= THRESH) dragging = true;
-      if (dragging) { e.preventDefault(); moved = true; apply(startVal + dx * step); }
-    };
-    const end = () => {
-      el.removeEventListener('touchmove', move);
-      el.removeEventListener('touchend', end);
-      if (!moved) el.focus();
-    };
-    el.addEventListener('touchmove', move, { passive: false });
-    el.addEventListener('touchend', end);
-  }, { passive: true });
+    if(document.activeElement===el) return;
+    sx=e.touches[0].clientX; sv=parseFloat(el.value); moved=false;
+    const tm = e => { const d=e.touches[0].clientX-sx; if(Math.abs(d)>3){e.preventDefault();moved=true;el.value=clamp(sv+d*step);cb(clamp(sv+d*step));} };
+    const te = () => { el.removeEventListener('touchmove',tm); el.removeEventListener('touchend',te); if(!moved)el.focus(); };
+    el.addEventListener('touchmove',tm,{passive:false}); el.addEventListener('touchend',te);
+  },{passive:true});
 }
+drag(fontInput,  10,200,1,   v=>{S.fs=v;  syncPrompter();});
+drag(widthInput, 20,100,1,   v=>{S.w=v;   syncPrompter();});
+drag(lineInput,  1, 4,  0.1, v=>{S.lh=v;  syncPrompter();});
 
-makeDraggable(fontInput,  10, 200, 1,   v => { state.fontSize  = v; applySettings(); });
-makeDraggable(widthInput, 20, 100, 1,   v => { state.width     = v; applySettings(); });
-makeDraggable(lineInput,  1,  4,   0.1, v => { state.lineHeight = v; applySettings(); });
-
-// ══════════════════════════════
-// SCRIPT INPUT → 실시간 반영
-// ══════════════════════════════
-scriptInput.addEventListener('input', () => {
-  state.text = scriptInput.value;
-  // 프리뷰 즉시 갱신
-  renderPreview();
-  // 프롬프터: 커서 위치 비율로 동기화
-  const cursorRatio = (scriptInput.selectionStart || 0) / Math.max(1, scriptInput.value.length);
-  prompterContent.innerHTML = toHtml(state.text);
-  requestAnimationFrame(() => { setPromptRatio(cursorRatio); updatePosBar(); });
-  // 검색 하이라이트 유지
-  if (document.getElementById('scriptSearchInput').value)
-    renderScriptHighlight(document.getElementById('scriptSearchInput').value, scriptCurrentHit);
-});
-
-// 스크립트 스크롤 → 오버레이 동기
-scriptInput.addEventListener('scroll', () => {
-  scriptHighlight.scrollTop = scriptInput.scrollTop;
-});
-
-// ══════════════════════════════
-// PREVIEW PANEL TOGGLE
-// ══════════════════════════════
+// ── PREVIEW TOGGLE ──
 previewToggle.addEventListener('click', () => {
   previewPanel.classList.toggle('hidden');
   previewToggle.classList.toggle('active', !previewPanel.classList.contains('hidden'));
 });
 
-// ══════════════════════════════
-// SCRIPT SEARCH
-// ══════════════════════════════
-let scriptHits = [], scriptCurrentHit = -1;
+// ── PROMPTER SCROLL ──
+function getRatio() { const m=prompter.scrollHeight-prompter.clientHeight; return m<=0?0:prompter.scrollTop/m; }
+function setRatio(r) { const m=prompter.scrollHeight-prompter.clientHeight; prompter.scrollTop=r*m; }
+function updateBar() {
+  const r=getRatio(), bh=document.getElementById('posBar').clientHeight;
+  const th=Math.max(24,bh*(prompter.clientHeight/Math.max(1,prompter.scrollHeight)));
+  const t=document.getElementById('posThumb');
+  t.style.height=th+'px'; t.style.top=(r*(bh-th))+'px';
+}
+prompter.addEventListener('scroll', updateBar);
 
+// 탭 탭 → UI 표시
+promptPage.addEventListener('click', e => {
+  if(e.target.closest('#promptSearchBar')||e.target.closest('#promptOverlay')) return;
+  promptPage.classList.add('show-ui');
+  clearTimeout(promptPage._t);
+  promptPage._t = setTimeout(()=>promptPage.classList.remove('show-ui'), 2500);
+});
+
+// orientation
+window.addEventListener('orientationchange', ()=>{ const r=getRatio(); setTimeout(()=>setRatio(r),300); });
+window.addEventListener('resize', ()=>{ const r=getRatio(); requestAnimationFrame(()=>setRatio(r)); });
+
+// ── SCRIPT SEARCH ──
 document.getElementById('scriptSearchToggle').addEventListener('click', () => {
   const bar = document.getElementById('scriptSearchBar');
   const open = !bar.classList.contains('open');
   bar.classList.toggle('open', open);
-  if (open) { document.getElementById('scriptSearchInput').focus(); }
-  else { clearScriptSearch(); }
+  if(open) document.getElementById('scriptSearchInput').focus();
+  else clearSS();
 });
+document.getElementById('sClose').addEventListener('click', ()=>{ document.getElementById('scriptSearchBar').classList.remove('open'); clearSS(); });
+document.getElementById('scriptSearchInput').addEventListener('input', e => runSS(e.target.value));
+document.getElementById('sPrev').addEventListener('click', ()=>jumpSS(S.sIdx-1));
+document.getElementById('sNext').addEventListener('click', ()=>jumpSS(S.sIdx+1));
 
-document.getElementById('scriptCloseSearch').addEventListener('click', () => {
-  document.getElementById('scriptSearchBar').classList.remove('open');
-  clearScriptSearch();
-});
-
-document.getElementById('scriptSearchInput').addEventListener('input', e => {
-  runScriptSearch(e.target.value);
-});
-document.getElementById('scriptPrevHit').addEventListener('click', () => jumpScriptHit(scriptCurrentHit - 1));
-document.getElementById('scriptNextHit').addEventListener('click', () => jumpScriptHit(scriptCurrentHit + 1));
-
-function runScriptSearch(query) {
-  scriptHits = []; scriptCurrentHit = -1;
-  if (!query) { document.getElementById('scriptSearchInfo').textContent = '0 / 0'; renderScriptHighlight('', -1); return; }
-  const lower = scriptInput.value.toLowerCase();
-  const q = query.toLowerCase();
-  let p = 0;
-  while ((p = lower.indexOf(q, p)) !== -1) { scriptHits.push(p); p += q.length; }
-  document.getElementById('scriptSearchInfo').textContent = `0 / ${scriptHits.length}`;
-  if (scriptHits.length) { scriptCurrentHit = 0; document.getElementById('scriptSearchInfo').textContent = `1 / ${scriptHits.length}`; }
-  renderScriptHighlight(query, scriptCurrentHit);
-  if (scriptHits.length) scrollScriptToHit(0);
+function runSS(q) {
+  S.sHits=[]; S.sIdx=-1;
+  if(!q){document.getElementById('ssi').textContent='0 / 0'; renderScriptHL('', -1); return;}
+  const lo=scriptInput.value.toLowerCase(), ql=q.toLowerCase();
+  let p=0; while((p=lo.indexOf(ql,p))!==-1){S.sHits.push(p);p+=ql.length;}
+  document.getElementById('ssi').textContent=`0 / ${S.sHits.length}`;
+  if(S.sHits.length){S.sIdx=0; document.getElementById('ssi').textContent=`1 / ${S.sHits.length}`;}
+  renderScriptHL(q, S.sIdx);
+  if(S.sHits.length) scrollSS(0);
 }
-
-function jumpScriptHit(i) {
-  if (!scriptHits.length) return;
-  scriptCurrentHit = (i + scriptHits.length) % scriptHits.length;
-  document.getElementById('scriptSearchInfo').textContent = `${scriptCurrentHit + 1} / ${scriptHits.length}`;
-  renderScriptHighlight(document.getElementById('scriptSearchInput').value, scriptCurrentHit);
-  requestAnimationFrame(() => {
-    const mark = scriptHighlight.querySelector('mark.current');
-    if (!mark) return;
-    const top = mark.offsetTop - scriptHighlight.clientHeight / 2 + mark.offsetHeight;
-    scriptHighlight.scrollTop = Math.max(0, top);
-    scriptInput.scrollTop = scriptHighlight.scrollTop;
+function jumpSS(i) {
+  if(!S.sHits.length) return;
+  S.sIdx=(i+S.sHits.length)%S.sHits.length;
+  document.getElementById('ssi').textContent=`${S.sIdx+1} / ${S.sHits.length}`;
+  renderScriptHL(document.getElementById('scriptSearchInput').value, S.sIdx);
+  requestAnimationFrame(()=>{
+    const m=scriptHL.querySelector('mark.cur');
+    if(!m) return;
+    const top=m.offsetTop-scriptHL.clientHeight/2+m.offsetHeight;
+    scriptHL.scrollTop=Math.max(0,top); scriptInput.scrollTop=scriptHL.scrollTop;
   });
 }
-
-function scrollScriptToHit(i) {
-  requestAnimationFrame(() => {
-    const mark = scriptHighlight.querySelector('mark.current');
-    if (!mark) return;
-    const top = mark.offsetTop - scriptHighlight.clientHeight / 2 + mark.offsetHeight;
-    scriptHighlight.scrollTop = Math.max(0, top);
-    scriptInput.scrollTop = scriptHighlight.scrollTop;
+function scrollSS(i) {
+  requestAnimationFrame(()=>{
+    const m=scriptHL.querySelector('mark.cur');
+    if(!m) return;
+    const top=m.offsetTop-scriptHL.clientHeight/2+m.offsetHeight;
+    scriptHL.scrollTop=Math.max(0,top); scriptInput.scrollTop=scriptHL.scrollTop;
   });
 }
-
-function renderScriptHighlight(query, currentIdx) {
-  if (!query) { scriptHighlight.innerHTML = ''; return; }
-  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(`(${escaped})`, 'gi');
-  let idx = 0;
-  const html = scriptInput.value
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(regex, m => `<mark class="${idx++ === currentIdx ? 'current' : ''}">${m}</mark>`);
-  scriptHighlight.innerHTML = html;
-  scriptHighlight.scrollTop = scriptInput.scrollTop;
+function renderScriptHL(q, ci) {
+  if(!q){scriptHL.innerHTML=''; return;}
+  const esc=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const rx=new RegExp(`(${esc})`,'gi');
+  let i=0;
+  scriptHL.innerHTML = scriptInput.value
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(rx,m=>`<mark class="${i++===ci?'cur':''}">${m}</mark>`);
+  scriptHL.scrollTop=scriptInput.scrollTop;
+}
+function clearSS() {
+  S.sHits=[]; S.sIdx=-1;
+  document.getElementById('scriptSearchInput').value='';
+  document.getElementById('ssi').textContent='0 / 0';
+  scriptHL.innerHTML='';
 }
 
-function clearScriptSearch() {
-  scriptHits = []; scriptCurrentHit = -1;
-  document.getElementById('scriptSearchInput').value = '';
-  document.getElementById('scriptSearchInfo').textContent = '0 / 0';
-  scriptHighlight.innerHTML = '';
+// ── PROMPTER SEARCH ──
+document.getElementById('pSearchBtn').addEventListener('click', ()=>{
+  const bar=document.getElementById('promptSearchBar');
+  bar.classList.toggle('open');
+  if(bar.classList.contains('open')) document.getElementById('promptSearchInput').focus();
+  else clearPS();
+});
+document.getElementById('pClose').addEventListener('click',()=>{ document.getElementById('promptSearchBar').classList.remove('open'); clearPS(); });
+document.getElementById('promptSearchInput').addEventListener('input', e=>runPS(e.target.value));
+document.getElementById('pPrev').addEventListener('click',()=>jumpPS(S.pIdx-1));
+document.getElementById('pNext').addEventListener('click',()=>jumpPS(S.pIdx+1));
+
+function runPS(q) {
+  clearPSHL(); S.pHits=[]; S.pIdx=-1;
+  if(!q){document.getElementById('psi').textContent='0 / 0'; return;}
+  const esc=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const rx=new RegExp(`(${esc})`,'gi');
+  let i=0;
+  PC.innerHTML=toHtml(S.text).replace(rx,m=>`<mark class="hit" data-i="${i++}">${m}</mark>`);
+  S.pHits=Array.from(PC.querySelectorAll('mark.hit'));
+  document.getElementById('psi').textContent=`0 / ${S.pHits.length}`;
+  if(S.pHits.length) jumpPS(0);
 }
-
-// ══════════════════════════════
-// PROMPTER SEARCH
-// ══════════════════════════════
-document.getElementById('promptSearchBtn').addEventListener('click', () => {
-  document.getElementById('promptSearchBar').classList.toggle('open');
-  if (document.getElementById('promptSearchBar').classList.contains('open'))
-    document.getElementById('promptSearchInput').focus();
-  else clearPromptSearch();
-});
-
-document.getElementById('promptCloseSearch').addEventListener('click', () => {
-  document.getElementById('promptSearchBar').classList.remove('open');
-  clearPromptSearch();
-});
-
-document.getElementById('promptSearchInput').addEventListener('input', e => {
-  runPromptSearch(e.target.value);
-});
-document.getElementById('promptPrevHit').addEventListener('click', () => jumpPromptHit(state.promptCurrentHit - 1));
-document.getElementById('promptNextHit').addEventListener('click', () => jumpPromptHit(state.promptCurrentHit + 1));
-
-function runPromptSearch(query) {
-  clearPromptHighlights();
-  state.promptSearchHits = []; state.promptCurrentHit = -1;
-  if (!query) { document.getElementById('promptSearchInfo').textContent = '0 / 0'; return; }
-  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(`(${escaped})`, 'gi');
-  let idx = 0;
-  prompterContent.innerHTML = toHtml(state.text).replace(regex, m =>
-    `<mark class="hit" data-idx="${idx++}">${m}</mark>`
-  );
-  state.promptSearchHits = Array.from(prompterContent.querySelectorAll('mark.hit'));
-  document.getElementById('promptSearchInfo').textContent = `0 / ${state.promptSearchHits.length}`;
-  if (state.promptSearchHits.length) jumpPromptHit(0);
+function jumpPS(i) {
+  if(!S.pHits.length) return;
+  S.pHits[S.pIdx]?.classList.remove('cur');
+  S.pIdx=(i+S.pHits.length)%S.pHits.length;
+  const el=S.pHits[S.pIdx]; el.classList.add('cur');
+  document.getElementById('psi').textContent=`${S.pIdx+1} / ${S.pHits.length}`;
+  prompter.scrollTo({top:el.offsetTop-prompter.clientHeight/2,behavior:'smooth'});
+  setTimeout(updateBar,350);
 }
+function clearPSHL(){PC.innerHTML=toHtml(S.text);}
+function clearPS(){S.pHits=[];S.pIdx=-1;document.getElementById('promptSearchInput').value='';document.getElementById('psi').textContent='0 / 0';clearPSHL();}
 
-function jumpPromptHit(i) {
-  if (!state.promptSearchHits.length) return;
-  if (state.promptCurrentHit >= 0) state.promptSearchHits[state.promptCurrentHit]?.classList.remove('current');
-  state.promptCurrentHit = (i + state.promptSearchHits.length) % state.promptSearchHits.length;
-  const el = state.promptSearchHits[state.promptCurrentHit];
-  el.classList.add('current');
-  document.getElementById('promptSearchInfo').textContent = `${state.promptCurrentHit + 1} / ${state.promptSearchHits.length}`;
-  prompter.scrollTo({ top: el.offsetTop - prompter.clientHeight / 2, behavior: 'smooth' });
-  setTimeout(updatePosBar, 350);
-}
-
-function clearPromptHighlights() { prompterContent.innerHTML = toHtml(state.text); }
-function clearPromptSearch() {
-  state.promptSearchHits = []; state.promptCurrentHit = -1;
-  document.getElementById('promptSearchInput').value = '';
-  document.getElementById('promptSearchInfo').textContent = '0 / 0';
-  clearPromptHighlights();
-}
-
-// ══════════════════════════════
-// GUIDE LINE
-// ══════════════════════════════
-cursorLineBtn.addEventListener('click', () => {
-  cursorLine.classList.toggle('show');
-  cursorLineBtn.classList.toggle('active', cursorLine.classList.contains('show'));
+// ── GUIDE LINE ──
+document.getElementById('guideBtn').addEventListener('click',()=>{
+  const g=document.getElementById('guideLine');
+  g.classList.toggle('show');
+  document.getElementById('guideBtn').classList.toggle('active',g.classList.contains('show'));
 });
 
-// ══════════════════════════════
-// RESIZE PANEL
-// ══════════════════════════════
-const resizeHandle = document.getElementById('resizeHandle');
-let resizing = false, rStartX = 0, rStartW = 0;
-resizeHandle.addEventListener('mousedown', e => {
-  resizing = true; rStartX = e.clientX; rStartW = previewPanel.offsetWidth;
-  resizeHandle.classList.add('dragging');
-});
-resizeHandle.addEventListener('touchstart', e => {
-  resizing = true; rStartX = e.touches[0].clientX; rStartW = previewPanel.offsetWidth;
-  resizeHandle.classList.add('dragging');
-}, { passive: true });
-document.addEventListener('mousemove', e => {
-  if (!resizing) return;
-  previewPanel.style.width = Math.max(160, Math.min(500, rStartW - (e.clientX - rStartX))) + 'px';
-});
-document.addEventListener('touchmove', e => {
-  if (!resizing) return;
-  previewPanel.style.width = Math.max(160, Math.min(500, rStartW - (e.touches[0].clientX - rStartX))) + 'px';
-}, { passive: true });
-document.addEventListener('mouseup',  () => { resizing = false; resizeHandle.classList.remove('dragging'); });
-document.addEventListener('touchend', () => { resizing = false; resizeHandle.classList.remove('dragging'); });
+// ── RESIZE ──
+const rh=document.getElementById('resizeHandle');
+let rs=false,rx0=0,rw0=0;
+rh.addEventListener('mousedown',e=>{rs=true;rx0=e.clientX;rw0=previewPanel.offsetWidth;rh.classList.add('dragging');});
+rh.addEventListener('touchstart',e=>{rs=true;rx0=e.touches[0].clientX;rw0=previewPanel.offsetWidth;rh.classList.add('dragging');},{passive:true});
+document.addEventListener('mousemove',e=>{if(!rs)return;previewPanel.style.width=Math.max(160,Math.min(500,rw0-(e.clientX-rx0)))+'px';});
+document.addEventListener('touchmove',e=>{if(!rs)return;previewPanel.style.width=Math.max(160,Math.min(500,rw0-(e.touches[0].clientX-rx0)))+'px';},{passive:true});
+document.addEventListener('mouseup',()=>{rs=false;rh.classList.remove('dragging');});
+document.addEventListener('touchend',()=>{rs=false;rh.classList.remove('dragging');});
 
-// ══════════════════════════════
-// FILE UPLOAD
-// ══════════════════════════════
-document.getElementById('uploadBtn').addEventListener('click', () => document.getElementById('fileInput').click());
-document.getElementById('fileInput').addEventListener('change', async () => {
-  const file = document.getElementById('fileInput').files[0];
-  if (!file) return;
-  document.getElementById('fileInput').value = '';
-  const ext = file.name.split('.').pop().toLowerCase();
-  const status = document.getElementById('uploadStatus');
-  status.className = ''; status.textContent = '읽는 중...';
+// ── FILE UPLOAD ──
+document.getElementById('uploadBtn2').addEventListener('click',()=>document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', async ()=>{
+  const file=document.getElementById('fileInput').files[0];
+  if(!file) return;
+  document.getElementById('fileInput').value='';
+  const ext=file.name.split('.').pop().toLowerCase();
+  const st=document.getElementById('uploadStatus');
+  st.className=''; st.textContent='읽는 중...';
   try {
-    let text = ext === 'txt' ? await readTxt(file) : ext === 'docx' ? await readDocx(file) : (() => { throw new Error('docx · txt만 가능합니다'); })();
-    state.text = text.trim();
-    scriptInput.value = state.text;
-    renderAll(); applySettings();
-    status.textContent = '✓ ' + file.name;
-    setTimeout(() => { status.textContent = ''; }, 3000);
-  } catch(e) {
-    status.className = 'err'; status.textContent = '⚠ ' + e.message;
-  }
+    let text = ext==='txt' ? await readTxt(file) : ext==='docx' ? await readDocx(file) : (()=>{throw new Error('docx·txt만 가능')})();
+    S.text=text.trim();
+    scriptInput.value=S.text;
+    syncPrompter(); syncPreview();
+    st.textContent='✓ '+file.name;
+    setTimeout(()=>st.textContent='',3000);
+  } catch(e){ st.className='err'; st.textContent='⚠ '+e.message; }
 });
 
-function readTxt(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = e => res(e.target.result);
-    r.onerror = () => rej(new Error('파일을 읽을 수 없습니다'));
-    r.readAsText(file, 'UTF-8');
-  });
+function readTxt(f){
+  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=()=>rej(new Error('읽기 실패')); r.readAsText(f,'UTF-8'); });
 }
-
-async function readDocx(file) {
-  if (!window.mammoth) {
-    await new Promise((res, rej) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
-      s.onload = res;
-      s.onerror = () => rej(new Error('라이브러리 로드 실패'));
-      document.head.appendChild(s);
-    });
+async function readDocx(f){
+  if(!window.mammoth){
+    await new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js'; s.onload=res; s.onerror=()=>rej(new Error('라이브러리 로드 실패')); document.head.appendChild(s); });
   }
-  const ab = await file.arrayBuffer();
-  const result = await mammoth.convertToHtml({ arrayBuffer: ab });
-  if (!result.value) throw new Error('텍스트를 추출할 수 없습니다');
-  return parseDocxHtml(result.value);
+  const ab=await f.arrayBuffer();
+  const r=await mammoth.convertToHtml({arrayBuffer:ab});
+  if(!r.value) throw new Error('텍스트 추출 실패');
+  return parseDocx(r.value);
 }
-
-function parseDocxHtml(html) {
-  const SECTION_RE = /^(오프닝|작품설명|엔딩)$/;
-  const BREAK_RE   = /^\[(챕터|작품)\s*\S*\]$/;
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  const result = [];
-  const addBreak = () => { if (result.length) { result.push(''); result.push(''); } };
-  const collapse = t => t.split(/\n/).map(l => l.trim()).filter(Boolean).join(' ');
-
-  const tables = doc.querySelectorAll('table');
-  if (tables.length) {
-    tables.forEach(table => {
-      table.querySelectorAll('tr').forEach(row => {
-        const cells = row.querySelectorAll('td, th');
-        if (!cells.length) return;
-        const L = cells[0]?.innerText.trim() || '';
-        const R = cells[1]?.innerText.trim() || '';
-        if (SECTION_RE.test(L) || BREAK_RE.test(L)) {
-          addBreak(); result.push(L);
-          if (R) result.push(collapse(R));
-        } else {
-          const c = R || L;
-          if (c) result.push(collapse(c));
-        }
-      });
-    });
+function parseDocx(html){
+  const SR=/^(오프닝|작품설명|엔딩)$/, BR=/^\[(챕터|작품)\s*\S*\]$/;
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const res=[]; const brk=()=>{if(res.length){res.push('');res.push('');}};
+  const col=t=>t.split(/\n/).map(l=>l.trim()).filter(Boolean).join(' ');
+  const tables=doc.querySelectorAll('table');
+  if(tables.length){
+    tables.forEach(tb=>tb.querySelectorAll('tr').forEach(row=>{
+      const cs=row.querySelectorAll('td,th'); if(!cs.length) return;
+      const L=cs[0]?.innerText.trim()||'', R=cs[1]?.innerText.trim()||'';
+      if(SR.test(L)||BR.test(L)){brk();res.push(L);if(R)res.push(col(R));}
+      else{const c=R||L;if(c)res.push(col(c));}
+    }));
   } else {
-    let buf = [];
-    doc.querySelectorAll('p').forEach(p => {
-      const t = p.innerText.trim();
-      if (!t) return;
-      if (SECTION_RE.test(t) || BREAK_RE.test(t)) {
-        if (buf.length) { result.push(buf.join(' ')); buf = []; }
-        addBreak(); result.push(t);
-      } else buf.push(t);
+    let buf=[];
+    doc.querySelectorAll('p').forEach(p=>{
+      const t=p.innerText.trim(); if(!t) return;
+      if(SR.test(t)||BR.test(t)){if(buf.length){res.push(buf.join(' '));buf=[];}brk();res.push(t);}
+      else buf.push(t);
     });
-    if (buf.length) result.push(buf.join(' '));
+    if(buf.length)res.push(buf.join(' '));
   }
-  return result.join('\n');
+  return res.join('\n');
 }
 
-// ══════════════════════════════
-// KEYBOARD
-// ══════════════════════════════
-document.addEventListener('keydown', e => {
-  const tag = document.activeElement.tagName;
-  if (tag === 'TEXTAREA' || tag === 'INPUT') {
-    if (e.key === 'Escape') { document.activeElement.blur(); }
+// ── KEYBOARD ──
+document.addEventListener('keydown',e=>{
+  if(['TEXTAREA','INPUT'].includes(document.activeElement.tagName)){
+    if(e.key==='Escape') document.activeElement.blur();
     return;
   }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+  if((e.ctrlKey||e.metaKey)&&e.key==='f'){
     e.preventDefault();
-    if (state.currentTab === 'edit') document.getElementById('scriptSearchToggle').click();
-    else document.getElementById('promptSearchBtn').click();
+    S.tab==='edit' ? document.getElementById('scriptSearchToggle').click() : document.getElementById('pSearchBtn').click();
   }
 });
 </script>
