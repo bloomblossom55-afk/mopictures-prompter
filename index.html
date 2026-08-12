@@ -672,7 +672,7 @@ const cursorLineBtn     = document.getElementById('cursorLineBtn');
 // ══════════════════════════════
 scriptInput.value = state.text;
 renderAll();
-applySettings();
+applySettings(0);
 previewToggle.classList.add('active');
 
 // orientation / resize → 스크롤 위치 유지
@@ -698,8 +698,12 @@ function switchTab(tab) {
   } else {
     document.getElementById('tabPrompt').classList.add('active');
     document.getElementById('promptPage').classList.add('active');
-    renderPrompter();
-    updatePosBar();
+    // 탭 전환 후 레이아웃 확정되면 렌더
+    requestAnimationFrame(() => {
+      renderPrompter();
+      applySettings(0);
+      updatePosBar();
+    });
   }
 }
 
