@@ -19,44 +19,30 @@
   --accent:  #c8f560;
   --red:     #ff4d4d;
   --tab-h:   48px;
-  --tool-h:  40px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
 html { height: 100%; }
 body {
-  height: 100dvh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  height: 100dvh; overflow: hidden;
+  display: flex; flex-direction: column;
   font-family: 'Noto Sans KR', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  position: fixed;
-  inset: 0;
+  background: var(--bg); color: var(--text);
+  position: fixed; inset: 0;
   -webkit-font-smoothing: antialiased;
 }
 
 /* ── TAB BAR ── */
 #tabBar {
-  height: var(--tab-h);
-  min-height: var(--tab-h);
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: stretch;
-  flex-shrink: 0;
-  z-index: 100;
+  height: var(--tab-h); min-height: var(--tab-h);
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: stretch; flex-shrink: 0; z-index: 100;
 }
 .tab-logo {
-  display: flex; align-items: center;
-  padding: 0 14px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; font-weight: 600;
+  display: flex; align-items: center; padding: 0 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
   color: var(--accent); letter-spacing: 3px;
-  border-right: 1px solid var(--border);
-  flex-shrink: 0;
+  border-right: 1px solid var(--border); flex-shrink: 0;
 }
 .tab-btn {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -70,66 +56,38 @@ body {
   height: 2px; background: var(--accent); border-radius: 2px 2px 0 0;
 }
 
-/* ── WRAPPER: 두 탭이 flex-row로 나란히, JS로 translateX ── */
+/* ── SLIDE WRAP ── */
 #slideWrap {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  width: 200%;          /* 탭 2개 = 200% */
-  overflow: hidden;
-  min-height: 0;
+  flex: 1; display: flex; flex-direction: row;
+  width: 200%; overflow: hidden; min-height: 0;
   transition: transform .25s cubic-bezier(.4,0,.2,1);
 }
 #slideWrap.show-prompt { transform: translateX(-50%); }
 
-/* ── EDIT PAGE ── */
+/* ══════════════════════════════
+   EDIT PAGE
+══════════════════════════════ */
 #editPage {
-  width: 50%;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bg);
+  width: 50%; flex-shrink: 0;
+  display: flex; flex-direction: column;
+  overflow: hidden; background: var(--bg);
 }
 
-/* 툴바 */
+/* 편집 툴바: 파일불러오기 + 검색만 */
 #editToolbar {
-  height: var(--tool-h);
-  min-height: var(--tool-h);
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 0;
-  padding: 0 10px;
-  flex-shrink: 0;
-  overflow: hidden;
+  height: 44px; min-height: 44px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px; flex-shrink: 0;
 }
-.tb-group {
-  display: flex; align-items: center; gap: 4px;
-  padding: 0 8px; height: 100%;
-  border-right: 1px solid var(--border);
-}
-.tb-group:last-child { border-right: none; margin-left: auto; padding-right: 0; }
-.tb-label { font-size: 9px; color: var(--muted); white-space: nowrap; letter-spacing: .5px; }
-
-.num-input {
-  background: var(--surf2); border: 1px solid var(--bord2);
-  border-radius: 4px; color: var(--accent);
-  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
-  width: 42px; height: 24px; text-align: center; outline: none; padding: 0;
-  cursor: ew-resize; user-select: none; -webkit-user-select: none;
-}
-.num-input:focus { border-color: var(--accent); cursor: text; user-select: auto; -webkit-user-select: auto; }
-.num-unit { font-size: 9px; color: var(--muted); }
-
 .tb-btn {
   background: none; border: 1px solid var(--bord2); color: var(--muted2);
-  border-radius: 4px; padding: 0 8px; height: 24px; font-size: 11px;
+  border-radius: 4px; padding: 0 10px; height: 26px; font-size: 11px;
   cursor: pointer; white-space: nowrap; font-family: inherit;
-  display: inline-flex; align-items: center; gap: 3px; transition: all .15s;
+  display: inline-flex; align-items: center; gap: 4px; transition: all .15s;
 }
 .tb-btn:hover { border-color: var(--accent); color: var(--accent); }
 .tb-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
-#boldBtn { font-weight: 700; font-size: 13px; padding: 0 6px; }
 
 /* 스크립트 검색바 */
 #scriptSearchBar {
@@ -144,12 +102,9 @@ body {
   padding: 3px 8px; outline: none; font-family: inherit; min-width: 0;
 }
 #scriptSearchInput:focus { border-color: var(--accent); }
-#ssi { font-size: 10px; color: var(--muted); min-width: 38px; text-align: center; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
-.ss-btn { background: none; border: 1px solid var(--bord2); color: var(--muted2); border-radius: 3px; padding: 2px 6px; font-size: 10px; cursor: pointer; }
+.s-info { font-size: 10px; color: var(--muted); min-width: 38px; text-align: center; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+.ss-btn { background: none; border: 1px solid var(--bord2); color: var(--muted2); border-radius: 3px; padding: 2px 7px; font-size: 10px; cursor: pointer; height: 22px; display:inline-flex;align-items:center; }
 .ss-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-/* 편집 본체 */
-#editBody { flex: 1; display: flex; overflow: hidden; min-height: 0; }
 
 /* 하이라이트 오버레이 */
 #scriptHighlightWrap { flex: 1; position: relative; min-height: 0; overflow: hidden; }
@@ -159,8 +114,7 @@ body {
   font-family: 'Noto Sans KR', sans-serif;
   white-space: pre-wrap; word-break: break-word;
   color: transparent; pointer-events: none;
-  overflow-y: auto; overflow-x: hidden;
-  scrollbar-width: none; z-index: 1;
+  overflow-y: auto; overflow-x: hidden; scrollbar-width: none; z-index: 1;
 }
 #scriptHighlight::-webkit-scrollbar { display: none; }
 #scriptHighlight mark { background: rgba(200,245,96,.3); color: transparent; border-radius: 2px; }
@@ -169,112 +123,93 @@ body {
   position: absolute; inset: 0;
   background: transparent; border: none; color: var(--text);
   font-size: 14px; line-height: 1.8; padding: 14px;
-  resize: none; outline: none;
-  font-family: 'Noto Sans KR', sans-serif;
+  resize: none; outline: none; font-family: 'Noto Sans KR', sans-serif;
   z-index: 2; overflow-y: auto; overflow-x: hidden;
   scrollbar-width: thin; scrollbar-color: var(--bord2) transparent;
 }
 
-/* 미리보기 패널 */
-#resizeHandle { width: 4px; cursor: col-resize; background: transparent; flex-shrink: 0; touch-action: none; }
-#resizeHandle:hover, #resizeHandle.dragging { background: var(--accent); opacity: .4; }
-#previewPanel {
-  width: 240px; min-width: 180px; border-left: 1px solid var(--border);
-  display: flex; flex-direction: column; background: var(--surface); flex-shrink: 0;
-}
-#previewPanel.hidden { display: none; }
-#previewHeader {
-  padding: 6px 10px; font-size: 9px; letter-spacing: 2px;
-  color: var(--muted); text-transform: uppercase;
-  border-bottom: 1px solid var(--border); flex-shrink: 0;
-  display: flex; align-items: center; justify-content: space-between;
-}
-#previewLive { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 9px; }
-#previewContent {
-  flex: 1; overflow-y: auto; overflow-x: hidden;
-  padding: 12px; scrollbar-width: none;
-  font-family: 'Noto Sans KR', sans-serif;
-  color: var(--text); line-height: 1.7; font-size: 11px;
-  word-break: break-word; opacity: .75;
-}
-#previewContent::-webkit-scrollbar { display: none; }
-#uploadBar {
-  display: flex; align-items: center; gap: 6px;
-  padding: 7px 10px; border-top: 1px solid var(--border); flex-shrink: 0;
-}
-#uploadBtn2 { flex: 1; justify-content: center; font-size: 11px; }
-#uploadStatus { font-size: 10px; color: var(--accent); font-family: 'JetBrains Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
-#uploadStatus.err { color: var(--red); }
-
-/* ── PROMPT PAGE ── */
+/* ══════════════════════════════
+   PROMPT PAGE
+══════════════════════════════ */
 #promptPage {
-  width: 50%;
-  flex-shrink: 0;
-  position: relative;
-  background: #000;
-  overflow: hidden;
+  width: 50%; flex-shrink: 0;
+  position: relative; background: #000; overflow: hidden;
+  display: flex; flex-direction: column;
 }
-#prompter {
-  position: absolute; inset: 0;
-  overflow-y: auto; overflow-x: hidden;
-  padding: 80px 0 100px;
-  scrollbar-width: none;
-  touch-action: pan-y;
-}
-#prompter::-webkit-scrollbar { display: none; }
-#prompterContent {
-  margin: 0 auto;
-  color: #fff !important;
-  word-break: break-word;
-  display: block;
-}
-#prompterContent mark.hit { background: rgba(200,245,96,.25); color: var(--accent); border-radius: 2px; }
-#prompterContent mark.hit.cur { background: var(--accent); color: #000; }
 
-/* 프롬프터 오버레이 */
-#promptOverlay {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 10;
-  padding: 10px 12px;
-  display: flex; align-items: center; gap: 6px;
-  background: linear-gradient(to bottom, rgba(0,0,0,.85), transparent);
-  opacity: 0; transition: opacity .25s;
-  pointer-events: none;
+/* 프롬프터 설정 툴바 (항상 표시) */
+#promptToolbar {
+  height: 44px; min-height: 44px;
+  background: rgba(0,0,0,.85);
+  border-bottom: 1px solid #1a1a1a;
+  display: flex; align-items: center; gap: 0;
+  padding: 0 10px; flex-shrink: 0;
+  backdrop-filter: blur(8px);
+  z-index: 10;
 }
-#promptPage.show-ui #promptOverlay { opacity: 1; pointer-events: auto; }
+.pt-group {
+  display: flex; align-items: center; gap: 4px;
+  padding: 0 8px; height: 100%;
+  border-right: 1px solid #1a1a1a;
+}
+.pt-group:last-child { border-right: none; margin-left: auto; padding-right: 0; }
+.pt-label { font-size: 9px; color: #555; white-space: nowrap; letter-spacing: .5px; }
 
+.num-input {
+  background: #111; border: 1px solid #2a2a2a;
+  border-radius: 4px; color: var(--accent);
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+  width: 42px; height: 24px; text-align: center; outline: none; padding: 0;
+  cursor: ew-resize; user-select: none; -webkit-user-select: none;
+}
+.num-input:focus { border-color: var(--accent); cursor: text; user-select: auto; -webkit-user-select: auto; }
+.num-unit { font-size: 9px; color: #555; }
+
+.p-tbtn {
+  background: none; border: 1px solid #2a2a2a; color: #777;
+  border-radius: 4px; padding: 0 8px; height: 24px; font-size: 11px;
+  cursor: pointer; white-space: nowrap; font-family: inherit;
+  display: inline-flex; align-items: center; gap: 3px; transition: all .15s;
+}
+.p-tbtn:hover { border-color: var(--accent); color: var(--accent); }
+.p-tbtn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+#boldBtn { font-weight: 700; font-size: 13px; padding: 0 7px; }
+
+/* 프롬프터 검색바 */
 #promptSearchBar {
-  display: none; position: absolute; top: 0; left: 0; right: 0; z-index: 20;
-  align-items: center; gap: 5px; padding: 8px 10px;
-  background: rgba(0,0,0,.92); border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(6px);
+  display: none; align-items: center; gap: 5px;
+  padding: 6px 10px; background: rgba(0,0,0,.92);
+  border-bottom: 1px solid #1a1a1a; flex-shrink: 0;
+  backdrop-filter: blur(6px); z-index: 10;
 }
 #promptSearchBar.open { display: flex; }
 #promptSearchInput {
-  flex: 1; background: rgba(255,255,255,.08); border: 1px solid var(--bord2);
+  flex: 1; background: rgba(255,255,255,.08); border: 1px solid #2a2a2a;
   border-radius: 4px; color: #fff; font-size: 14px;
   padding: 4px 8px; outline: none; font-family: inherit;
 }
 #promptSearchInput:focus { border-color: var(--accent); }
-#psi { font-size: 10px; color: var(--muted2); min-width: 40px; text-align: center; font-family: 'JetBrains Mono', monospace; }
-.p-btn {
-  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
-  color: rgba(255,255,255,.75); border-radius: 4px; padding: 4px 10px;
-  font-size: 11px; cursor: pointer; font-family: inherit;
-  display: inline-flex; align-items: center; gap: 3px; transition: all .15s;
-  white-space: nowrap;
+
+/* 프롬프터 스크롤 영역 */
+#prompter {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 60px 0 80px; scrollbar-width: none;
+  touch-action: pan-y; min-height: 0;
 }
-.p-btn:hover { background: rgba(255,255,255,.15); color: #fff; }
-.p-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+#prompter::-webkit-scrollbar { display: none; }
+#prompterContent {
+  margin: 0 auto; color: #fff !important;
+  word-break: break-word; display: block;
+}
+#prompterContent mark.hit { background: rgba(200,245,96,.25); color: var(--accent); border-radius: 2px; }
+#prompterContent mark.hit.cur { background: var(--accent); color: #000; }
 
 /* 스크롤 바 */
-#posBar { position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background: rgba(255,255,255,.05); z-index: 5; pointer-events: none; }
-#posThumb { width: 3px; background: var(--accent); border-radius: 2px; position: absolute; top: 0; min-height: 24px; opacity: .5; }
+#posBar { position: absolute; right: 0; bottom: 0; top: 0; width: 3px; background: rgba(255,255,255,.04); z-index: 5; pointer-events: none; }
+#posThumb { width: 3px; background: var(--accent); border-radius: 2px; position: absolute; top: 0; min-height: 24px; opacity: .45; }
 
 /* 가이드선 */
-#guideLine {
-  display: none; position: absolute; top: 50%; left: 0; right: 4px;
-  height: 1px; background: rgba(200,245,96,.2); pointer-events: none; z-index: 4;
-}
+#guideLine { display: none; position: absolute; top: 50%; left: 0; right: 4px; height: 1px; background: rgba(200,245,96,.2); pointer-events: none; z-index: 4; }
 #guideLine.show { display: block; }
 </style>
 </head>
@@ -288,79 +223,75 @@ body {
 
 <div id="slideWrap">
 
-  <!-- EDIT PAGE -->
+  <!-- ── EDIT PAGE ── -->
   <div id="editPage">
+
     <div id="editToolbar">
-      <div class="tb-group">
-        <span class="tb-label">글자</span>
-        <input class="num-input" type="number" id="fontInput" min="10" max="200" value="48">
-        <span class="num-unit">px</span>
-      </div>
-      <div class="tb-group">
-        <span class="tb-label">너비</span>
-        <input class="num-input" type="number" id="widthInput" min="20" max="100" value="80">
-        <span class="num-unit">%</span>
-      </div>
-      <div class="tb-group">
-        <span class="tb-label">줄간격</span>
-        <input class="num-input" type="number" id="lineInput" min="1" max="4" step="0.1" value="1.7" style="width:38px">
-      </div>
-      <div class="tb-group">
-        <button class="tb-btn" id="boldBtn">B</button>
-      </div>
-      <div class="tb-group">
-        <button class="tb-btn" id="scriptSearchToggle">🔍</button>
-        <button class="tb-btn active" id="previewToggle">미리보기</button>
-      </div>
+      <input type="file" id="fileInput" accept=".docx,.txt" style="display:none">
+      <button class="tb-btn" id="uploadBtn">📂 파일 불러오기</button>
+      <div id="uploadStatus" style="font-size:10px;color:var(--accent);font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;"></div>
+      <button class="tb-btn" id="scriptSearchToggle" style="margin-left:auto">🔍 검색</button>
     </div>
 
     <div id="scriptSearchBar">
       <input type="text" id="scriptSearchInput" placeholder="스크립트 검색...">
-      <span id="ssi">0 / 0</span>
+      <span class="s-info" id="ssi">0 / 0</span>
       <button class="ss-btn" id="sPrev">▲</button>
       <button class="ss-btn" id="sNext">▼</button>
       <button class="ss-btn" id="sClose">✕</button>
     </div>
 
-    <div id="editBody">
-      <div id="scriptHighlightWrap">
-        <div id="scriptHighlight"></div>
-        <textarea id="scriptInput" spellcheck="false" placeholder="스크립트를 입력하거나 파일을 불러오세요."></textarea>
-      </div>
-      <div id="resizeHandle"></div>
-      <div id="previewPanel">
-        <div id="previewHeader">
-          <span>PREVIEW</span><span id="previewLive">● LIVE</span>
-        </div>
-        <div id="previewContent"></div>
-        <div id="uploadBar">
-          <input type="file" id="fileInput" accept=".docx,.txt" style="display:none">
-          <button class="tb-btn" id="uploadBtn2">📂 파일 불러오기</button>
-          <div id="uploadStatus"></div>
-        </div>
-      </div>
+    <div id="scriptHighlightWrap">
+      <div id="scriptHighlight"></div>
+      <textarea id="scriptInput" spellcheck="false" placeholder="스크립트를 입력하거나 파일을 불러오세요.
+
+오프닝, 작품설명, 엔딩, [챕터 1] 등의 단락이 자동으로 구분됩니다."></textarea>
     </div>
+
   </div>
 
-  <!-- PROMPT PAGE -->
+  <!-- ── PROMPT PAGE ── -->
   <div id="promptPage">
+
+    <!-- 항상 보이는 설정 툴바 -->
+    <div id="promptToolbar">
+      <div class="pt-group">
+        <span class="pt-label">글자</span>
+        <input class="num-input" type="number" id="fontInput" min="10" max="200" value="48">
+        <span class="num-unit">px</span>
+      </div>
+      <div class="pt-group">
+        <span class="pt-label">너비</span>
+        <input class="num-input" type="number" id="widthInput" min="20" max="100" value="80">
+        <span class="num-unit">%</span>
+      </div>
+      <div class="pt-group">
+        <span class="pt-label">줄간격</span>
+        <input class="num-input" type="number" id="lineInput" min="1" max="4" step="0.1" value="1.7" style="width:38px">
+      </div>
+      <div class="pt-group">
+        <button class="p-tbtn" id="boldBtn">B</button>
+        <button class="p-tbtn" id="guideBtn">가이드</button>
+        <button class="p-tbtn" id="pSearchBtn">🔍</button>
+      </div>
+    </div>
+
+    <!-- 프롬프터 검색바 -->
     <div id="promptSearchBar">
-      <input type="text" id="promptSearchInput" placeholder="검색어...">
-      <span id="psi">0 / 0</span>
+      <input type="text" id="promptSearchInput" placeholder="검색어 입력...">
+      <span class="s-info" id="psi">0 / 0</span>
       <button class="ss-btn" id="pPrev">▲</button>
       <button class="ss-btn" id="pNext">▼</button>
       <button class="ss-btn" id="pClose">✕</button>
     </div>
-    <div id="promptOverlay">
-      <button class="p-btn" id="pSearchBtn">🔍 검색</button>
-      <button class="p-btn" id="guideBtn">가이드선</button>
-      <button class="p-btn" onclick="showTab('edit')" style="margin-left:auto">✏️ 편집</button>
-    </div>
+
     <div id="prompter">
       <div id="prompterContent"></div>
     </div>
+
     <div id="guideLine"></div>
     <div id="posBar"><div id="posThumb"></div></div>
+
   </div>
 
 </div>
@@ -370,44 +301,37 @@ body {
 const S = {
   text: `오프닝\n환영합니다. 카메라를 바라보며 자연스럽게 시작하세요.\n\n[챕터 1]\n첫 번째 섹션 내용입니다. 스크립트를 입력하거나 파일을 불러오세요.\n\n작품설명\n이 작품에 대한 설명을 입력합니다.\n\n[챕터 2]\n두 번째 섹션입니다.\n\n엔딩\n마무리 멘트와 함께 클로징합니다.`,
   fs: 48, w: 80, lh: 1.7, bold: false,
-  tab: 'edit',
   sHits: [], sIdx: -1,
   pHits: [], pIdx: -1,
 };
 
-// ── ELEMENTS ──
-const scriptInput   = document.getElementById('scriptInput');
-const scriptHL      = document.getElementById('scriptHighlight');
-const fontInput     = document.getElementById('fontInput');
-const widthInput    = document.getElementById('widthInput');
-const lineInput     = document.getElementById('lineInput');
-const boldBtn       = document.getElementById('boldBtn');
-const previewPanel  = document.getElementById('previewPanel');
-const previewToggle = document.getElementById('previewToggle');
-const previewCont   = document.getElementById('previewContent');
-const prompter      = document.getElementById('prompter');
-const PC            = document.getElementById('prompterContent');
-const slideWrap     = document.getElementById('slideWrap');
-const promptPage    = document.getElementById('promptPage');
+const scriptInput  = document.getElementById('scriptInput');
+const scriptHL     = document.getElementById('scriptHighlight');
+const fontInput    = document.getElementById('fontInput');
+const widthInput   = document.getElementById('widthInput');
+const lineInput    = document.getElementById('lineInput');
+const boldBtn      = document.getElementById('boldBtn');
+const prompter     = document.getElementById('prompter');
+const PC           = document.getElementById('prompterContent');
+const slideWrap    = document.getElementById('slideWrap');
 
 // ── INIT ──
 scriptInput.value = S.text;
 syncPrompter();
-syncPreview();
 
 // ── TAB ──
 function showTab(tab) {
-  S.tab = tab;
-  document.getElementById('tabEdit').classList.toggle('active', tab === 'edit');
-  document.getElementById('tabPrompt').classList.toggle('active', tab === 'prompt');
-  slideWrap.classList.toggle('show-prompt', tab === 'prompt');
+  document.getElementById('tabEdit').classList.toggle('active', tab==='edit');
+  document.getElementById('tabPrompt').classList.toggle('active', tab==='prompt');
+  slideWrap.classList.toggle('show-prompt', tab==='prompt');
 }
 
-// ── SYNC ──
+// ── HTML 변환 ──
 function toHtml(t) {
   return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
 }
 
+// ── 프롬프터 동기화 ──
 function syncPrompter() {
   PC.innerHTML = toHtml(S.text);
   PC.style.fontSize   = S.fs + 'px';
@@ -416,15 +340,10 @@ function syncPrompter() {
   PC.style.fontWeight = S.bold ? '700' : '400';
 }
 
-function syncPreview() {
-  previewCont.innerHTML = toHtml(S.text);
-}
-
-// ── SCRIPT INPUT ──
+// ── 스크립트 입력 ──
 scriptInput.addEventListener('input', () => {
   S.text = scriptInput.value;
   syncPrompter();
-  syncPreview();
   const cr = (scriptInput.selectionStart||0) / Math.max(1, S.text.length);
   requestAnimationFrame(() => { setRatio(cr); updateBar(); });
   if (document.getElementById('scriptSearchInput').value)
@@ -432,7 +351,7 @@ scriptInput.addEventListener('input', () => {
 });
 scriptInput.addEventListener('scroll', () => { scriptHL.scrollTop = scriptInput.scrollTop; });
 
-// ── SETTINGS ──
+// ── 설정 컨트롤 ──
 fontInput.addEventListener('change', () => {
   S.fs = Math.min(200, Math.max(10, +fontInput.value||48));
   fontInput.value = S.fs; syncPrompter();
@@ -451,34 +370,28 @@ boldBtn.addEventListener('click', () => {
 
 // 드래그 수치 조절
 function drag(el, min, max, step, cb) {
-  let sx,sv,moved;
-  const clamp = v => parseFloat(Math.min(max,Math.max(min,Math.round(v/step)*step)).toFixed(step<1?1:0));
+  let sx, sv, moved;
+  const cl = v => parseFloat(Math.min(max,Math.max(min,Math.round(v/step)*step)).toFixed(step<1?1:0));
   el.addEventListener('mousedown', e => {
-    if(document.activeElement===el) return;
+    if (document.activeElement===el) return;
     sx=e.clientX; sv=parseFloat(el.value); moved=false; e.preventDefault();
-    const mm = e => { const d=e.clientX-sx; if(Math.abs(d)>3){moved=true; el.value=clamp(sv+d*step); cb(clamp(sv+d*step));} };
+    const mm = e => { const d=e.clientX-sx; if(Math.abs(d)>3){moved=true;el.value=cl(sv+d*step);cb(cl(sv+d*step));} };
     const mu = () => { document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); if(!moved)el.focus(); };
     document.addEventListener('mousemove',mm); document.addEventListener('mouseup',mu);
   });
   el.addEventListener('touchstart', e => {
-    if(document.activeElement===el) return;
+    if (document.activeElement===el) return;
     sx=e.touches[0].clientX; sv=parseFloat(el.value); moved=false;
-    const tm = e => { const d=e.touches[0].clientX-sx; if(Math.abs(d)>3){e.preventDefault();moved=true;el.value=clamp(sv+d*step);cb(clamp(sv+d*step));} };
+    const tm = e => { const d=e.touches[0].clientX-sx; if(Math.abs(d)>3){e.preventDefault();moved=true;el.value=cl(sv+d*step);cb(cl(sv+d*step));} };
     const te = () => { el.removeEventListener('touchmove',tm); el.removeEventListener('touchend',te); if(!moved)el.focus(); };
     el.addEventListener('touchmove',tm,{passive:false}); el.addEventListener('touchend',te);
   },{passive:true});
 }
-drag(fontInput,  10,200,1,   v=>{S.fs=v;  syncPrompter();});
-drag(widthInput, 20,100,1,   v=>{S.w=v;   syncPrompter();});
-drag(lineInput,  1, 4,  0.1, v=>{S.lh=v;  syncPrompter();});
+drag(fontInput,  10, 200, 1,   v=>{S.fs=v;  syncPrompter();});
+drag(widthInput, 20, 100, 1,   v=>{S.w=v;   syncPrompter();});
+drag(lineInput,  1,  4,   0.1, v=>{S.lh=v;  syncPrompter();});
 
-// ── PREVIEW TOGGLE ──
-previewToggle.addEventListener('click', () => {
-  previewPanel.classList.toggle('hidden');
-  previewToggle.classList.toggle('active', !previewPanel.classList.contains('hidden'));
-});
-
-// ── PROMPTER SCROLL ──
+// ── 프롬프터 스크롤 ──
 function getRatio() { const m=prompter.scrollHeight-prompter.clientHeight; return m<=0?0:prompter.scrollTop/m; }
 function setRatio(r) { const m=prompter.scrollHeight-prompter.clientHeight; prompter.scrollTop=r*m; }
 function updateBar() {
@@ -488,97 +401,80 @@ function updateBar() {
   t.style.height=th+'px'; t.style.top=(r*(bh-th))+'px';
 }
 prompter.addEventListener('scroll', updateBar);
+window.addEventListener('orientationchange',()=>{const r=getRatio();setTimeout(()=>setRatio(r),300);});
+window.addEventListener('resize',()=>{const r=getRatio();requestAnimationFrame(()=>setRatio(r));});
 
-// 탭 탭 → UI 표시
-promptPage.addEventListener('click', e => {
-  if(e.target.closest('#promptSearchBar')||e.target.closest('#promptOverlay')) return;
-  promptPage.classList.add('show-ui');
-  clearTimeout(promptPage._t);
-  promptPage._t = setTimeout(()=>promptPage.classList.remove('show-ui'), 2500);
+// ── 가이드선 ──
+document.getElementById('guideBtn').addEventListener('click',()=>{
+  const g=document.getElementById('guideLine');
+  g.classList.toggle('show');
+  document.getElementById('guideBtn').classList.toggle('active',g.classList.contains('show'));
 });
 
-// orientation
-window.addEventListener('orientationchange', ()=>{ const r=getRatio(); setTimeout(()=>setRatio(r),300); });
-window.addEventListener('resize', ()=>{ const r=getRatio(); requestAnimationFrame(()=>setRatio(r)); });
-
-// ── SCRIPT SEARCH ──
-document.getElementById('scriptSearchToggle').addEventListener('click', () => {
-  const bar = document.getElementById('scriptSearchBar');
-  const open = !bar.classList.contains('open');
-  bar.classList.toggle('open', open);
-  if(open) document.getElementById('scriptSearchInput').focus();
+// ── 스크립트 검색 ──
+document.getElementById('scriptSearchToggle').addEventListener('click',()=>{
+  const bar=document.getElementById('scriptSearchBar');
+  bar.classList.toggle('open');
+  if(bar.classList.contains('open')) document.getElementById('scriptSearchInput').focus();
   else clearSS();
 });
-document.getElementById('sClose').addEventListener('click', ()=>{ document.getElementById('scriptSearchBar').classList.remove('open'); clearSS(); });
-document.getElementById('scriptSearchInput').addEventListener('input', e => runSS(e.target.value));
-document.getElementById('sPrev').addEventListener('click', ()=>jumpSS(S.sIdx-1));
-document.getElementById('sNext').addEventListener('click', ()=>jumpSS(S.sIdx+1));
+document.getElementById('sClose').addEventListener('click',()=>{document.getElementById('scriptSearchBar').classList.remove('open');clearSS();});
+document.getElementById('scriptSearchInput').addEventListener('input',e=>runSS(e.target.value));
+document.getElementById('sPrev').addEventListener('click',()=>jumpSS(S.sIdx-1));
+document.getElementById('sNext').addEventListener('click',()=>jumpSS(S.sIdx+1));
 
 function runSS(q) {
   S.sHits=[]; S.sIdx=-1;
-  if(!q){document.getElementById('ssi').textContent='0 / 0'; renderScriptHL('', -1); return;}
-  const lo=scriptInput.value.toLowerCase(), ql=q.toLowerCase();
+  if(!q){document.getElementById('ssi').textContent='0 / 0';renderScriptHL('',-1);return;}
+  const lo=scriptInput.value.toLowerCase(),ql=q.toLowerCase();
   let p=0; while((p=lo.indexOf(ql,p))!==-1){S.sHits.push(p);p+=ql.length;}
   document.getElementById('ssi').textContent=`0 / ${S.sHits.length}`;
-  if(S.sHits.length){S.sIdx=0; document.getElementById('ssi').textContent=`1 / ${S.sHits.length}`;}
-  renderScriptHL(q, S.sIdx);
-  if(S.sHits.length) scrollSS(0);
+  if(S.sHits.length){S.sIdx=0;document.getElementById('ssi').textContent=`1 / ${S.sHits.length}`;}
+  renderScriptHL(q,S.sIdx);
+  if(S.sHits.length)scrollSS();
 }
 function jumpSS(i) {
   if(!S.sHits.length) return;
   S.sIdx=(i+S.sHits.length)%S.sHits.length;
   document.getElementById('ssi').textContent=`${S.sIdx+1} / ${S.sHits.length}`;
-  renderScriptHL(document.getElementById('scriptSearchInput').value, S.sIdx);
+  renderScriptHL(document.getElementById('scriptSearchInput').value,S.sIdx);
+  scrollSS();
+}
+function scrollSS() {
   requestAnimationFrame(()=>{
-    const m=scriptHL.querySelector('mark.cur');
-    if(!m) return;
+    const m=scriptHL.querySelector('mark.cur'); if(!m) return;
     const top=m.offsetTop-scriptHL.clientHeight/2+m.offsetHeight;
     scriptHL.scrollTop=Math.max(0,top); scriptInput.scrollTop=scriptHL.scrollTop;
   });
 }
-function scrollSS(i) {
-  requestAnimationFrame(()=>{
-    const m=scriptHL.querySelector('mark.cur');
-    if(!m) return;
-    const top=m.offsetTop-scriptHL.clientHeight/2+m.offsetHeight;
-    scriptHL.scrollTop=Math.max(0,top); scriptInput.scrollTop=scriptHL.scrollTop;
-  });
-}
-function renderScriptHL(q, ci) {
-  if(!q){scriptHL.innerHTML=''; return;}
+function renderScriptHL(q,ci) {
+  if(!q){scriptHL.innerHTML='';return;}
   const esc=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  const rx=new RegExp(`(${esc})`,'gi');
-  let i=0;
-  scriptHL.innerHTML = scriptInput.value
+  const rx=new RegExp(`(${esc})`,'gi'); let i=0;
+  scriptHL.innerHTML=scriptInput.value
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(rx,m=>`<mark class="${i++===ci?'cur':''}">${m}</mark>`);
   scriptHL.scrollTop=scriptInput.scrollTop;
 }
-function clearSS() {
-  S.sHits=[]; S.sIdx=-1;
-  document.getElementById('scriptSearchInput').value='';
-  document.getElementById('ssi').textContent='0 / 0';
-  scriptHL.innerHTML='';
-}
+function clearSS(){S.sHits=[];S.sIdx=-1;document.getElementById('scriptSearchInput').value='';document.getElementById('ssi').textContent='0 / 0';scriptHL.innerHTML='';}
 
-// ── PROMPTER SEARCH ──
-document.getElementById('pSearchBtn').addEventListener('click', ()=>{
+// ── 프롬프터 검색 ──
+document.getElementById('pSearchBtn').addEventListener('click',()=>{
   const bar=document.getElementById('promptSearchBar');
   bar.classList.toggle('open');
   if(bar.classList.contains('open')) document.getElementById('promptSearchInput').focus();
   else clearPS();
 });
-document.getElementById('pClose').addEventListener('click',()=>{ document.getElementById('promptSearchBar').classList.remove('open'); clearPS(); });
-document.getElementById('promptSearchInput').addEventListener('input', e=>runPS(e.target.value));
+document.getElementById('pClose').addEventListener('click',()=>{document.getElementById('promptSearchBar').classList.remove('open');clearPS();});
+document.getElementById('promptSearchInput').addEventListener('input',e=>runPS(e.target.value));
 document.getElementById('pPrev').addEventListener('click',()=>jumpPS(S.pIdx-1));
 document.getElementById('pNext').addEventListener('click',()=>jumpPS(S.pIdx+1));
 
 function runPS(q) {
   clearPSHL(); S.pHits=[]; S.pIdx=-1;
-  if(!q){document.getElementById('psi').textContent='0 / 0'; return;}
+  if(!q){document.getElementById('psi').textContent='0 / 0';return;}
   const esc=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  const rx=new RegExp(`(${esc})`,'gi');
-  let i=0;
+  const rx=new RegExp(`(${esc})`,'gi'); let i=0;
   PC.innerHTML=toHtml(S.text).replace(rx,m=>`<mark class="hit" data-i="${i++}">${m}</mark>`);
   S.pHits=Array.from(PC.querySelectorAll('mark.hit'));
   document.getElementById('psi').textContent=`0 / ${S.pHits.length}`;
@@ -596,48 +492,29 @@ function jumpPS(i) {
 function clearPSHL(){PC.innerHTML=toHtml(S.text);}
 function clearPS(){S.pHits=[];S.pIdx=-1;document.getElementById('promptSearchInput').value='';document.getElementById('psi').textContent='0 / 0';clearPSHL();}
 
-// ── GUIDE LINE ──
-document.getElementById('guideBtn').addEventListener('click',()=>{
-  const g=document.getElementById('guideLine');
-  g.classList.toggle('show');
-  document.getElementById('guideBtn').classList.toggle('active',g.classList.contains('show'));
-});
-
-// ── RESIZE ──
-const rh=document.getElementById('resizeHandle');
-let rs=false,rx0=0,rw0=0;
-rh.addEventListener('mousedown',e=>{rs=true;rx0=e.clientX;rw0=previewPanel.offsetWidth;rh.classList.add('dragging');});
-rh.addEventListener('touchstart',e=>{rs=true;rx0=e.touches[0].clientX;rw0=previewPanel.offsetWidth;rh.classList.add('dragging');},{passive:true});
-document.addEventListener('mousemove',e=>{if(!rs)return;previewPanel.style.width=Math.max(160,Math.min(500,rw0-(e.clientX-rx0)))+'px';});
-document.addEventListener('touchmove',e=>{if(!rs)return;previewPanel.style.width=Math.max(160,Math.min(500,rw0-(e.touches[0].clientX-rx0)))+'px';},{passive:true});
-document.addEventListener('mouseup',()=>{rs=false;rh.classList.remove('dragging');});
-document.addEventListener('touchend',()=>{rs=false;rh.classList.remove('dragging');});
-
-// ── FILE UPLOAD ──
-document.getElementById('uploadBtn2').addEventListener('click',()=>document.getElementById('fileInput').click());
-document.getElementById('fileInput').addEventListener('change', async ()=>{
-  const file=document.getElementById('fileInput').files[0];
-  if(!file) return;
+// ── 파일 업로드 ──
+document.getElementById('uploadBtn').addEventListener('click',()=>document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change',async()=>{
+  const file=document.getElementById('fileInput').files[0]; if(!file) return;
   document.getElementById('fileInput').value='';
   const ext=file.name.split('.').pop().toLowerCase();
   const st=document.getElementById('uploadStatus');
   st.className=''; st.textContent='읽는 중...';
   try {
-    let text = ext==='txt' ? await readTxt(file) : ext==='docx' ? await readDocx(file) : (()=>{throw new Error('docx·txt만 가능')})();
-    S.text=text.trim();
-    scriptInput.value=S.text;
-    syncPrompter(); syncPreview();
-    st.textContent='✓ '+file.name;
+    let text = ext==='txt' ? await readTxt(file) : ext==='docx' ? await readDocx(file) : (()=>{throw new Error('docx·txt만 가능');})();
+    S.text=text.trim(); scriptInput.value=S.text;
+    syncPrompter();
+    st.style.color='var(--accent)'; st.textContent='✓ '+file.name;
     setTimeout(()=>st.textContent='',3000);
-  } catch(e){ st.className='err'; st.textContent='⚠ '+e.message; }
+  } catch(e){ st.style.color='var(--red)'; st.textContent='⚠ '+e.message; }
 });
 
 function readTxt(f){
-  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=()=>rej(new Error('읽기 실패')); r.readAsText(f,'UTF-8'); });
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=()=>rej(new Error('읽기 실패'));r.readAsText(f,'UTF-8');});
 }
 async function readDocx(f){
   if(!window.mammoth){
-    await new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js'; s.onload=res; s.onerror=()=>rej(new Error('라이브러리 로드 실패')); document.head.appendChild(s); });
+    await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';s.onload=res;s.onerror=()=>rej(new Error('라이브러리 로드 실패'));document.head.appendChild(s);});
   }
   const ab=await f.arrayBuffer();
   const r=await mammoth.convertToHtml({arrayBuffer:ab});
@@ -645,22 +522,22 @@ async function readDocx(f){
   return parseDocx(r.value);
 }
 function parseDocx(html){
-  const SR=/^(오프닝|작품설명|엔딩)$/, BR=/^\[(챕터|작품)\s*\S*\]$/;
+  const SR=/^(오프닝|작품설명|엔딩)$/,BR=/^\[(챕터|작품)\s*\S*\]$/;
   const doc=new DOMParser().parseFromString(html,'text/html');
   const res=[]; const brk=()=>{if(res.length){res.push('');res.push('');}};
   const col=t=>t.split(/\n/).map(l=>l.trim()).filter(Boolean).join(' ');
   const tables=doc.querySelectorAll('table');
   if(tables.length){
     tables.forEach(tb=>tb.querySelectorAll('tr').forEach(row=>{
-      const cs=row.querySelectorAll('td,th'); if(!cs.length) return;
-      const L=cs[0]?.innerText.trim()||'', R=cs[1]?.innerText.trim()||'';
+      const cs=row.querySelectorAll('td,th');if(!cs.length)return;
+      const L=cs[0]?.innerText.trim()||'',R=cs[1]?.innerText.trim()||'';
       if(SR.test(L)||BR.test(L)){brk();res.push(L);if(R)res.push(col(R));}
       else{const c=R||L;if(c)res.push(col(c));}
     }));
   } else {
     let buf=[];
     doc.querySelectorAll('p').forEach(p=>{
-      const t=p.innerText.trim(); if(!t) return;
+      const t=p.innerText.trim();if(!t)return;
       if(SR.test(t)||BR.test(t)){if(buf.length){res.push(buf.join(' '));buf=[];}brk();res.push(t);}
       else buf.push(t);
     });
@@ -669,16 +546,10 @@ function parseDocx(html){
   return res.join('\n');
 }
 
-// ── KEYBOARD ──
+// ── 키보드 ──
 document.addEventListener('keydown',e=>{
-  if(['TEXTAREA','INPUT'].includes(document.activeElement.tagName)){
-    if(e.key==='Escape') document.activeElement.blur();
-    return;
-  }
-  if((e.ctrlKey||e.metaKey)&&e.key==='f'){
-    e.preventDefault();
-    S.tab==='edit' ? document.getElementById('scriptSearchToggle').click() : document.getElementById('pSearchBtn').click();
-  }
+  if(['TEXTAREA','INPUT'].includes(document.activeElement.tagName)){if(e.key==='Escape')document.activeElement.blur();return;}
+  if((e.ctrlKey||e.metaKey)&&e.key==='f'){e.preventDefault();document.getElementById('pSearchBtn').click();}
 });
 </script>
 </body>
