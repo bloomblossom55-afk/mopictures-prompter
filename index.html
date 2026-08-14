@@ -202,8 +202,9 @@ body {
   position: absolute; inset: 0;
   overflow-y: auto; overflow-x: hidden;
   padding: 60px 0 80px; scrollbar-width: none;
-  transform-origin: 0 0;
+  transform-origin: top center;
   will-change: transform;
+  touch-action: pan-y; /* 1손가락 스크롤 허용 */
 }
 #prompterScroller::-webkit-scrollbar { display: none; }
 #prompter::-webkit-scrollbar { display: none; }
@@ -559,79 +560,51 @@ function parseDocx(html){
   return res.join('\n');
 }
 
-// ── 핀치 줌 + 1손가락 팬 (화면 자체 확대/축소/이동) ──
-let vZoom = 1.0, vPanX = 0, vPanY = 0;
-let pinchStartDist = 0, pinchStartZoom = 1;
-let pinchStartPanX = 0, pinchStartPanY = 0, pinchMidX = 0, pinchMidY = 0;
-let panStartX = 0, panStartY = 0, panStartPX = 0, panStartPY = 0;
-let isPinching = false, isPanning = false;
+// ── 핀치 줌 (화면 자체 확대/축소, 글자크기 고정) ──
+// prompterScroller 전체를 scale — 1손가락은 기본 스크롤 유지
+let pZoom = 1.0, pPinchDist = 0, pPinchZoom = 1;
 
-function getTouchDist(t) {
-  const dx = t[0].clientX - t[1].clientX;
-  const dy = t[0].clientY - t[1].clientY;
-  return Math.sqrt(dx*dx + dy*dy);
+function ptDist(t) {
+  return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
 }
-function getTouchMid(t) {
-  return { x: (t[0].clientX+t[1].clientX)/2, y: (t[0].clientY+t[1].clientY)/2 };
+function ptMid(t) {
+  return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
 }
-function clampPan() {
-  const ww = prompterWrap.clientWidth;
-  const wh = prompterWrap.clientHeight;
-  const sw = prompter.scrollWidth * vZoom;   // 콘텐츠 실제 크기
-  const sh = prompter.scrollHeight * vZoom;
-  vPanX = sw <= ww ? (ww-sw)/2 : Math.min(0, Math.max(ww-sw, vPanX));
-  vPanY = Math.min(0, Math.max(wh-sh, vPanY));
-}
-function applyTransform() {
-  prompter.style.transform = `translate(${vPanX}px, ${vPanY}px) scale(${vZoom})`;
-  prompter.style.transformOrigin = '0 0';
-  prompter.style.width  = (100 / vZoom) + '%';
-  prompter.style.height = (100 / vZoom) + '%';
+function setZoom(z, midY) {
+  const prev = pZoom;
+  pZoom = Math.min(4.0, Math.max(0.3, z));
+  // 핀치 중심 y 기준으로 스크롤 보정 (보던 위치 유지)
+  if (midY !== undefined) {
+    const ratio = (prompter.scrollTop + midY) / (prompter.scrollHeight * prev);
+    prompter.style.transform = `scale(${pZoom})`;
+    prompter.style.transformOrigin = 'top center';
+    requestAnimationFrame(() => {
+      prompter.scrollTop = ratio * prompter.scrollHeight * pZoom - midY;
+      updateBar();
+    });
+  } else {
+    prompter.style.transform = `scale(${pZoom})`;
+    prompter.style.transformOrigin = 'top center';
+  }
 }
 
-// 2손가락: 핀치
 prompterWrap.addEventListener('touchstart', e => {
   if (e.touches.length === 2) {
     e.preventDefault();
-    isPinching = true; isPanning = false;
-    pinchStartDist = getTouchDist(e.touches);
-    pinchStartZoom = vZoom;
-    pinchStartPanX = vPanX; pinchStartPanY = vPanY;
-    const mid = getTouchMid(e.touches);
-    pinchMidX = mid.x; pinchMidY = mid.y;
-  } else if (e.touches.length === 1 && vZoom > 1.05) {
-    // 확대된 상태에서 1손가락 팬
-    isPanning = true;
-    panStartX = e.touches[0].clientX; panStartY = e.touches[0].clientY;
-    panStartPX = vPanX; panStartPY = vPanY;
+    pPinchDist = ptDist(e.touches);
+    pPinchZoom = pZoom;
   }
 }, { passive: false });
 
 prompterWrap.addEventListener('touchmove', e => {
-  if (isPinching && e.touches.length === 2) {
+  if (e.touches.length === 2) {
     e.preventDefault();
-    const dist = getTouchDist(e.touches);
-    const mid  = getTouchMid(e.touches);
-    const newZoom = Math.min(4.0, Math.max(0.5, pinchStartZoom * (dist/pinchStartDist)));
-    // 핀치 중심점 기준으로 pan 보정
-    vPanX = pinchStartPanX + (mid.x - pinchMidX) - (newZoom/pinchStartZoom - 1) * (pinchMidX - pinchStartPanX);
-    vPanY = pinchStartPanY + (mid.y - pinchMidY) - (newZoom/pinchStartZoom - 1) * (pinchMidY - pinchStartPanY);
-    vZoom = newZoom;
-    clampPan();
-    applyTransform();
-  } else if (isPanning && e.touches.length === 1) {
-    e.preventDefault();
-    vPanX = panStartPX + (e.touches[0].clientX - panStartX);
-    vPanY = panStartPY + (e.touches[0].clientY - panStartY);
-    clampPan();
-    applyTransform();
+    const dist = ptDist(e.touches);
+    const mid  = ptMid(e.touches);
+    const rect = prompterWrap.getBoundingClientRect();
+    setZoom(pPinchZoom * (dist / pPinchDist), mid.y - rect.top);
   }
 }, { passive: false });
-
-prompterWrap.addEventListener('touchend', e => {
-  if (e.touches.length < 2) isPinching = false;
-  if (e.touches.length === 0) isPanning = false;
-}, { passive: true });
 
 // ── 키보드 ──
 document.addEventListener('keydown',e=>{
