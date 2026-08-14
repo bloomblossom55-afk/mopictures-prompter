@@ -191,13 +191,21 @@ body {
 #promptSearchInput:focus { border-color: var(--accent); }
 
 /* 프롬프터 스크롤 영역 */
+/* 프롬프터 뷰포트 */
 #prompter {
-  flex: 1; overflow-y: auto; overflow-x: hidden;
-  padding: 60px 0 80px; scrollbar-width: none;
-  touch-action: pan-y; min-height: 0;
+  flex: 1; overflow: hidden;
+  min-height: 0; position: relative;
+  touch-action: none;
 }
-/* 핀치 중에는 touch-action none으로 전환 */
-#prompter.pinching { touch-action: none; }
+/* 실제 스크롤+스케일 컨테이너 */
+#prompterScroller {
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 60px 0 80px; scrollbar-width: none;
+  transform-origin: top center;
+  will-change: transform;
+}
+#prompterScroller::-webkit-scrollbar { display: none; }
 #prompter::-webkit-scrollbar { display: none; }
 #prompterContent {
   margin: 0 auto; color: #fff !important;
@@ -288,7 +296,9 @@ body {
     </div>
 
     <div id="prompter">
-      <div id="prompterContent"></div>
+      <div id="prompterScroller">
+        <div id="prompterContent"></div>
+      </div>
     </div>
 
     <div id="guideLine"></div>
@@ -313,7 +323,8 @@ const fontInput    = document.getElementById('fontInput');
 const widthInput   = document.getElementById('widthInput');
 const lineInput    = document.getElementById('lineInput');
 const boldBtn      = document.getElementById('boldBtn');
-const prompter     = document.getElementById('prompter');
+const prompter     = document.getElementById('prompterScroller');
+const prompterWrap = document.getElementById('prompter');
 const PC           = document.getElementById('prompterContent');
 const slideWrap    = document.getElementById('slideWrap');
 
@@ -548,8 +559,8 @@ function parseDocx(html){
   return res.join('\n');
 }
 
-// ── 핀치 줌 (프롬프터 글자 크기 조절) ──
-let pinchStartDist = 0, pinchStartFs = 0;
+// ── 핀치 줌 (화면 scale 확대/축소) ──
+let zoom = 1.0, pinchStartDist = 0, pinchStartZoom = 1;
 
 function getTouchDist(t) {
   const dx = t[0].clientX - t[1].clientX;
@@ -557,33 +568,34 @@ function getTouchDist(t) {
   return Math.sqrt(dx*dx + dy*dy);
 }
 
-prompter.addEventListener('touchstart', e => {
+function applyZoom(z) {
+  zoom = Math.min(4.0, Math.max(0.5, z));
+  // transform-origin top center 유지하며 scale
+  prompter.style.transform = `scale(${zoom})`;
+  prompter.style.transformOrigin = 'top center';
+  // 스케일이 커지면 wrapper 높이 보정
+  prompter.style.width  = (100 / zoom) + '%';
+  prompter.style.height = (100 / zoom) + '%';
+  prompter.style.left   = ((1 - 1/zoom) / 2 * 100) + '%';
+}
+
+prompterWrap.addEventListener('touchstart', e => {
   if (e.touches.length === 2) {
     e.preventDefault();
-    prompter.classList.add('pinching');
     pinchStartDist = getTouchDist(e.touches);
-    pinchStartFs = S.fs;
+    pinchStartZoom = zoom;
   }
 }, { passive: false });
 
-prompter.addEventListener('touchmove', e => {
+prompterWrap.addEventListener('touchmove', e => {
   if (e.touches.length === 2) {
     e.preventDefault();
     const dist = getTouchDist(e.touches);
-    const newFs = Math.round(Math.min(200, Math.max(10, pinchStartFs * (dist / pinchStartDist))));
-    if (newFs !== S.fs) {
-      const r = getRatio();
-      S.fs = newFs;
-      fontInput.value = newFs;
-      PC.style.fontSize = newFs + 'px';
-      requestAnimationFrame(() => setRatio(r));
-    }
+    const r = getRatio();
+    applyZoom(pinchStartZoom * (dist / pinchStartDist));
+    requestAnimationFrame(() => setRatio(r));
   }
 }, { passive: false });
-
-prompter.addEventListener('touchend', e => {
-  if (e.touches.length < 2) prompter.classList.remove('pinching');
-}, { passive: true });
 
 // ── 키보드 ──
 document.addEventListener('keydown',e=>{
