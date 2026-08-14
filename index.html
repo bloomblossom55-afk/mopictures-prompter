@@ -18,7 +18,7 @@
   --muted2:  #666;
   --accent:  #c8f560;
   --red:     #ff4d4d;
-  --tab-h:   48px;
+  --tab-h:   34px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -40,14 +40,14 @@ body {
 }
 .tab-logo {
   display: flex; align-items: center; padding: 0 14px;
-  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
   color: var(--accent); letter-spacing: 3px;
   border-right: 1px solid var(--border); flex-shrink: 0;
 }
 .tab-btn {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
   background: none; border: none; cursor: pointer;
-  font-size: 13px; font-weight: 500; color: var(--muted2);
+  font-size: 11px; font-weight: 500; color: var(--muted2);
   font-family: inherit; position: relative; transition: color .15s;
 }
 .tab-btn.active { color: var(--text); }
@@ -196,6 +196,8 @@ body {
   padding: 60px 0 80px; scrollbar-width: none;
   touch-action: pan-y; min-height: 0;
 }
+/* 핀치 중에는 touch-action none으로 전환 */
+#prompter.pinching { touch-action: none; }
 #prompter::-webkit-scrollbar { display: none; }
 #prompterContent {
   margin: 0 auto; color: #fff !important;
@@ -545,6 +547,43 @@ function parseDocx(html){
   }
   return res.join('\n');
 }
+
+// ── 핀치 줌 (프롬프터 글자 크기 조절) ──
+let pinchStartDist = 0, pinchStartFs = 0;
+
+function getTouchDist(t) {
+  const dx = t[0].clientX - t[1].clientX;
+  const dy = t[0].clientY - t[1].clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+
+prompter.addEventListener('touchstart', e => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    prompter.classList.add('pinching');
+    pinchStartDist = getTouchDist(e.touches);
+    pinchStartFs = S.fs;
+  }
+}, { passive: false });
+
+prompter.addEventListener('touchmove', e => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    const dist = getTouchDist(e.touches);
+    const newFs = Math.round(Math.min(200, Math.max(10, pinchStartFs * (dist / pinchStartDist))));
+    if (newFs !== S.fs) {
+      const r = getRatio();
+      S.fs = newFs;
+      fontInput.value = newFs;
+      PC.style.fontSize = newFs + 'px';
+      requestAnimationFrame(() => setRatio(r));
+    }
+  }
+}, { passive: false });
+
+prompter.addEventListener('touchend', e => {
+  if (e.touches.length < 2) prompter.classList.remove('pinching');
+}, { passive: true });
 
 // ── 키보드 ──
 document.addEventListener('keydown',e=>{
