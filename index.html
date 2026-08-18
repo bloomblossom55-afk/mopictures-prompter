@@ -2,652 +2,844 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>MO PROMPTER</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프롬프터</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap');
 
-:root {
-  --bg:      #080808;
-  --surface: #101010;
-  --surf2:   #161616;
-  --border:  #1e1e1e;
-  --bord2:   #2a2a2a;
-  --text:    #e8e8e8;
-  --muted:   #444;
-  --muted2:  #666;
-  --accent:  #c8f560;
-  --red:     #ff4d4d;
-  --tab-h:   34px;
-}
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --border: #222;
+    --accent: #e8c96d;
+    --accent2: #6de8c9;
+    --text: #f0f0f0;
+    --muted: #555;
+    --panel-w: 320px;
+  }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html { height: 100%; overflow: hidden; }
-body {
-  height: 100dvh; overflow: hidden;
-  display: flex; flex-direction: column;
-  font-family: 'Noto Sans KR', sans-serif;
-  background: var(--bg); color: var(--text);
-  position: fixed; inset: 0;
-  -webkit-font-smoothing: antialiased;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── TAB BAR ── */
-#tabBar {
-  height: var(--tab-h); min-height: var(--tab-h);
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  display: flex; align-items: stretch; flex-shrink: 0; z-index: 100;
-}
-.tab-logo {
-  display: flex; align-items: center; padding: 0 14px;
-  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
-  color: var(--accent); letter-spacing: 3px;
-  border-right: 1px solid var(--border); flex-shrink: 0;
-}
-.tab-btn {
-  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-  background: none; border: none; cursor: pointer;
-  font-size: 11px; font-weight: 500; color: var(--muted2);
-  font-family: inherit; position: relative; transition: color .15s;
-}
-.tab-btn.active { color: var(--text); }
-.tab-btn.active::after {
-  content: ''; position: absolute; bottom: 0; left: 15%; right: 15%;
-  height: 2px; background: var(--accent); border-radius: 2px 2px 0 0;
-}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
 
-/* ── SLIDE WRAP ── */
-#slideWrap {
-  flex: 1; display: flex; flex-direction: row;
-  width: 200%; overflow: hidden; min-height: 0;
-  transition: transform .25s cubic-bezier(.4,0,.2,1);
-}
-#slideWrap.show-prompt { transform: translateX(-50%); }
+  /* ── TOP BAR ── */
+  #topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
 
-/* ══════════════════════════════
-   EDIT PAGE
-══════════════════════════════ */
-#editPage {
-  width: 50%; flex-shrink: 0;
-  display: flex; flex-direction: column;
-  overflow: hidden; background: var(--bg);
-}
+  #topbar .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-right: 6px;
+  }
 
-/* 편집 툴바: 파일불러오기 + 검색만 */
-#editToolbar {
-  height: 44px; min-height: 44px;
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 8px;
-  padding: 0 12px; flex-shrink: 0;
-}
-.tb-btn {
-  background: none; border: 1px solid var(--bord2); color: var(--muted2);
-  border-radius: 4px; padding: 0 10px; height: 26px; font-size: 11px;
-  cursor: pointer; white-space: nowrap; font-family: inherit;
-  display: inline-flex; align-items: center; gap: 4px; transition: all .15s;
-}
-.tb-btn:hover { border-color: var(--accent); color: var(--accent); }
-.tb-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+  .ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-left: 1px solid var(--border);
+    padding-left: 10px;
+  }
 
-/* 스크립트 검색바 */
-#scriptSearchBar {
-  display: none; align-items: center; gap: 5px;
-  padding: 5px 10px; background: var(--surf2);
-  border-bottom: 1px solid var(--border); flex-shrink: 0;
-}
-#scriptSearchBar.open { display: flex; }
-#scriptSearchInput {
-  flex: 1; background: var(--bg); border: 1px solid var(--bord2);
-  border-radius: 4px; color: var(--text); font-size: 13px;
-  padding: 3px 8px; outline: none; font-family: inherit; min-width: 0;
-}
-#scriptSearchInput:focus { border-color: var(--accent); }
-.s-info { font-size: 10px; color: var(--muted); min-width: 38px; text-align: center; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
-.ss-btn { background: none; border: 1px solid var(--bord2); color: var(--muted2); border-radius: 3px; padding: 2px 7px; font-size: 10px; cursor: pointer; height: 22px; display:inline-flex;align-items:center; }
-.ss-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .ctrl-label {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
 
-/* 하이라이트 오버레이 */
-#scriptHighlightWrap { flex: 1; position: relative; min-height: 0; overflow: hidden; }
-#scriptHighlight {
-  position: absolute; inset: 0;
-  font-size: 14px; line-height: 1.8; padding: 14px;
-  font-family: 'Noto Sans KR', sans-serif;
-  white-space: pre-wrap; word-break: break-word;
-  color: transparent; pointer-events: none;
-  overflow-y: auto; overflow-x: hidden; scrollbar-width: none; z-index: 1;
-}
-#scriptHighlight::-webkit-scrollbar { display: none; }
-#scriptHighlight mark { background: rgba(200,245,96,.3); color: transparent; border-radius: 2px; }
-#scriptHighlight mark.cur { background: var(--accent); }
-#scriptInput {
-  position: absolute; inset: 0;
-  background: transparent; border: none; color: var(--text);
-  font-size: 14px; line-height: 1.8; padding: 14px;
-  resize: none; outline: none; font-family: 'Noto Sans KR', sans-serif;
-  z-index: 2; overflow-y: auto; overflow-x: hidden;
-  scrollbar-width: thin; scrollbar-color: var(--bord2) transparent;
-}
+  input[type=range] {
+    -webkit-appearance: none;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
 
-/* ══════════════════════════════
-   PROMPT PAGE
-══════════════════════════════ */
-#promptPage {
-  width: 50%; flex-shrink: 0;
-  position: relative; background: #000; overflow: hidden;
-  display: flex; flex-direction: column;
-}
+  .val-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    min-width: 32px;
+    text-align: right;
+  }
 
-/* 프롬프터 설정 툴바 (항상 표시) */
-#promptToolbar {
-  height: 44px; min-height: 44px;
-  background: rgba(0,0,0,.85);
-  border-bottom: 1px solid #1a1a1a;
-  display: flex; align-items: center; gap: 0;
-  padding: 0 10px; flex-shrink: 0;
-  backdrop-filter: blur(8px);
-  z-index: 10;
-}
-.pt-group {
-  display: flex; align-items: center; gap: 4px;
-  padding: 0 8px; height: 100%;
-  border-right: 1px solid #1a1a1a;
-}
-.pt-group:last-child { border-right: none; margin-left: auto; padding-right: 0; }
-.pt-label { font-size: 9px; color: #555; white-space: nowrap; letter-spacing: .5px; }
+  /* icon buttons */
+  .btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color .15s, color .15s, background .15s;
+    font-family: inherit;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
-.num-input {
-  background: #111; border: 1px solid #2a2a2a;
-  border-radius: 4px; color: var(--accent);
-  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
-  width: 42px; height: 24px; text-align: center; outline: none; padding: 0;
-  cursor: ew-resize; user-select: none; -webkit-user-select: none;
-}
-.num-input:focus { border-color: var(--accent); cursor: text; user-select: auto; -webkit-user-select: auto; }
-.num-unit { font-size: 9px; color: #555; }
+  /* speed control */
+  #playBtn {
+    font-size: 16px;
+    padding: 4px 12px;
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+  #playBtn:hover, #playBtn.active { background: var(--accent2); color: #000; border-color: var(--accent2); }
 
-.p-tbtn {
-  background: none; border: 1px solid #2a2a2a; color: #777;
-  border-radius: 4px; padding: 0 8px; height: 24px; font-size: 11px;
-  cursor: pointer; white-space: nowrap; font-family: inherit;
-  display: inline-flex; align-items: center; gap: 3px; transition: all .15s;
-}
-.p-tbtn:hover { border-color: var(--accent); color: var(--accent); }
-.p-tbtn.active { background: var(--accent); color: #000; border-color: var(--accent); }
-#boldBtn { font-weight: 700; font-size: 13px; padding: 0 7px; }
+  /* ── SEARCH BAR ── */
+  #searchBar {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: #0f0f0f;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  #searchBar.open { display: flex; }
 
-/* 프롬프터 검색바 */
-#promptSearchBar {
-  display: none; align-items: center; gap: 5px;
-  padding: 6px 10px; background: rgba(0,0,0,.92);
-  border-bottom: 1px solid #1a1a1a; flex-shrink: 0;
-  backdrop-filter: blur(6px); z-index: 10;
-}
-#promptSearchBar.open { display: flex; }
-#promptSearchInput {
-  flex: 1; background: rgba(255,255,255,.08); border: 1px solid #2a2a2a;
-  border-radius: 4px; color: #fff; font-size: 14px;
-  padding: 4px 8px; outline: none; font-family: inherit;
-}
-#promptSearchInput:focus { border-color: var(--accent); }
+  #searchInput {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 14px;
+    padding: 5px 10px;
+    outline: none;
+    font-family: inherit;
+  }
+  #searchInput:focus { border-color: var(--accent2); }
 
-/* 프롬프터 스크롤 영역 */
-/* 프롬프터 뷰포트 */
-#prompter {
-  flex: 1; overflow: hidden;
-  min-height: 0; position: relative;
-  touch-action: none;
-}
-/* 실제 스크롤 컨테이너 */
-#prompterScroller {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  overflow-y: auto; overflow-x: hidden;
-  padding: 60px 0 80px; scrollbar-width: none;
-  transform-origin: 0 0;
-  will-change: transform;
-  touch-action: none; /* JS에서 직접 처리 */
-}
-#prompterScroller::-webkit-scrollbar { display: none; }
-#prompter::-webkit-scrollbar { display: none; }
-#prompterContent {
-  margin: 0 auto; color: #fff !important;
-  word-break: break-word; display: block;
-}
-#prompterContent mark.hit { background: rgba(200,245,96,.25); color: var(--accent); border-radius: 2px; }
-#prompterContent mark.hit.cur { background: var(--accent); color: #000; }
+  #searchInfo {
+    font-size: 12px;
+    color: var(--muted);
+    min-width: 70px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
 
-/* 스크롤 바 */
-#posBar { position: absolute; right: 0; bottom: 0; top: 0; width: 3px; background: rgba(255,255,255,.04); z-index: 5; pointer-events: none; }
-#posThumb { width: 3px; background: var(--accent); border-radius: 2px; position: absolute; top: 0; min-height: 24px; opacity: .45; }
+  /* ── MAIN LAYOUT ── */
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
 
-/* 가이드선 */
-#guideLine { display: none; position: absolute; top: 50%; left: 0; right: 4px; height: 1px; background: rgba(200,245,96,.2); pointer-events: none; z-index: 4; }
-#guideLine.show { display: block; }
+  /* ── SCRIPT PANEL ── */
+  #scriptPanel {
+    width: var(--panel-w);
+    min-width: 200px;
+    background: #0d0d0d;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  #scriptPanel.hidden { display: none; }
+
+  #scriptPanel .panel-title {
+    padding: 8px 12px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #uploadArea {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  #uploadArea .btn { width: 100%; text-align: center; font-size: 12px; }
+  #uploadStatus {
+    font-size: 11px;
+    color: var(--accent2);
+    min-height: 14px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  #uploadStatus.err { color: #e86d6d; }
+
+  #scriptInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.8;
+    padding: 14px;
+    resize: none;
+    outline: none;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  /* ── PROMPTER ── */
+  #prompterWrap {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: var(--bg);
+  }
+
+  #prompter {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    padding: 60px 0;
+    /* hide scrollbar */
+    scrollbar-width: none;
+  }
+  #prompter::-webkit-scrollbar { display: none; }
+
+  #prompterContent {
+    margin: 0 auto;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+    /* width & font-size set via JS */
+  }
+
+  /* mirrored */
+  body.mirror #prompterContent {
+    transform: scaleX(-1);
+  }
+
+  /* highlight */
+  #prompterContent mark.hit {
+    background: rgba(232,201,109,.25);
+    color: var(--accent);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+  #prompterContent mark.hit.current {
+    background: var(--accent);
+    color: #000;
+  }
+
+  /* scroll position indicator */
+  #posBar {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--border);
+  }
+  #posThumb {
+    width: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+    position: absolute;
+    top: 0;
+    transition: top .1s;
+    min-height: 20px;
+  }
+
+  /* speed overlay */
+  #speedHud {
+    position: absolute;
+    bottom: 14px;
+    right: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* resize handle */
+  #resizeHandle {
+    width: 5px;
+    cursor: col-resize;
+    background: transparent;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+  }
+  #resizeHandle:hover, #resizeHandle.dragging {
+    background: var(--accent);
+    opacity: .5;
+  }
+
+  /* ── MODAL: 스크립트 편집 ── */
+  #editModal {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  #editModal.open { display: flex; }
+  #editBox {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 680px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  #editBox h2 { font-size: 15px; color: var(--accent); }
+  #editTextarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 12px;
+    resize: vertical;
+    min-height: 300px;
+    outline: none;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  #editBox .row { display: flex; gap: 10px; justify-content: flex-end; }
 </style>
 </head>
 <body>
 
-<div id="tabBar">
-  <div class="tab-logo">MO</div>
-  <button class="tab-btn active" id="tabEdit" onclick="showTab('edit')">✏️ 편집</button>
-  <button class="tab-btn" id="tabPrompt" onclick="showTab('prompt')">📺 프롬프터</button>
+<!-- TOP BAR -->
+<div id="topbar">
+  <span class="logo">PROMPTER</span>
+
+  <div class="ctrl-group">
+    <span class="ctrl-label">글자크기</span>
+    <input type="range" id="fontRange" min="18" max="120" value="48" style="width:90px">
+    <span class="val-badge" id="fontVal">48</span>
+  </div>
+
+  <div class="ctrl-group">
+    <span class="ctrl-label">너비</span>
+    <input type="range" id="widthRange" min="30" max="100" value="80" style="width:80px">
+    <span class="val-badge" id="widthVal">80%</span>
+  </div>
+
+  <div class="ctrl-group">
+    <span class="ctrl-label">속도</span>
+    <input type="range" id="speedRange" min="0" max="10" step="0.5" value="2" style="width:70px">
+    <span class="val-badge" id="speedVal">2</span>
+  </div>
+
+  <div class="ctrl-group">
+    <span class="ctrl-label">줄간격</span>
+    <input type="range" id="lineRange" min="1" max="3" step="0.1" value="1.7" style="width:70px">
+    <span class="val-badge" id="lineVal">1.7</span>
+  </div>
+
+  <div class="ctrl-group" style="gap:6px">
+    <button class="btn" id="boldBtn" title="볼드체 토글" style="font-weight:700;font-size:14px;min-width:34px">B</button>
+  </div>
+
+  <div class="ctrl-group" style="gap:6px">
+    <button class="btn" id="playBtn" title="스페이스바로도 제어">▶</button>
+    <button class="btn" id="resetBtn" title="처음으로">↩</button>
+  </div>
+
+  <div class="ctrl-group" style="gap:6px">
+    <button class="btn" id="searchToggle" title="검색 (Ctrl+F)">🔍 검색</button>
+    <button class="btn" id="mirrorBtn" title="좌우 반전">⇆ 미러</button>
+    <button class="btn" id="panelToggle" title="스크립트 패널">📝 스크립트</button>
+    <button class="btn" id="editBtn" title="스크립트 편집">✏️ 편집</button>
+  </div>
 </div>
 
-<div id="slideWrap">
+<!-- SEARCH BAR -->
+<div id="searchBar">
+  <span style="color:var(--accent2);font-size:12px;white-space:nowrap">🔍 검색</span>
+  <input type="text" id="searchInput" placeholder="검색어 입력...">
+  <span id="searchInfo">0 / 0</span>
+  <button class="btn" id="prevHit">▲</button>
+  <button class="btn" id="nextHit">▼</button>
+  <button class="btn" id="closeSearch">✕</button>
+</div>
 
-  <!-- ── EDIT PAGE ── -->
-  <div id="editPage">
-
-    <div id="editToolbar">
+<!-- MAIN -->
+<div id="main">
+  <!-- Script panel -->
+  <div id="scriptPanel">
+    <div class="panel-title">스크립트</div>
+    <div id="uploadArea">
       <input type="file" id="fileInput" accept=".docx,.txt" style="display:none">
-      <button class="tb-btn" id="uploadBtn">📂 파일 불러오기</button>
-      <div id="uploadStatus" style="font-size:10px;color:var(--accent);font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;"></div>
-      <button class="tb-btn" id="scriptSearchToggle" style="margin-left:auto">🔍 검색</button>
+      <button class="btn" id="uploadBtn">📂 파일 불러오기 &nbsp;<span style="color:var(--muted);font-size:10px;">docx · txt</span></button>
+      <div id="uploadStatus"></div>
     </div>
+    <textarea id="scriptInput" placeholder="여기에 자막/스크립트를 입력하세요...
 
-    <div id="scriptSearchBar">
-      <input type="text" id="scriptSearchInput" placeholder="스크립트 검색...">
-      <span class="s-info" id="ssi">0 / 0</span>
-      <button class="ss-btn" id="sPrev">▲</button>
-      <button class="ss-btn" id="sNext">▼</button>
-      <button class="ss-btn" id="sClose">✕</button>
-    </div>
+예시:
+안녕하세요, 여러분.
+오늘은 중요한 내용을 발표하겠습니다.
 
-    <div id="scriptHighlightWrap">
-      <div id="scriptHighlight"></div>
-      <textarea id="scriptInput" spellcheck="false" placeholder="스크립트를 입력하거나 파일을 불러오세요.
-
-오프닝, 작품설명, 엔딩, [챕터 1] 등의 단락이 자동으로 구분됩니다."></textarea>
-    </div>
-
+준비되셨나요?"></textarea>
   </div>
 
-  <!-- ── PROMPT PAGE ── -->
-  <div id="promptPage">
+  <!-- Resize handle -->
+  <div id="resizeHandle"></div>
 
-    <!-- 항상 보이는 설정 툴바 -->
-    <div id="promptToolbar">
-      <div class="pt-group">
-        <span class="pt-label">글자</span>
-        <input class="num-input" type="number" id="fontInput" min="10" max="200" value="48">
-        <span class="num-unit">px</span>
-      </div>
-      <div class="pt-group">
-        <span class="pt-label">너비</span>
-        <input class="num-input" type="number" id="widthInput" min="20" max="100" value="80">
-        <span class="num-unit">%</span>
-      </div>
-      <div class="pt-group">
-        <span class="pt-label">줄간격</span>
-        <input class="num-input" type="number" id="lineInput" min="1" max="4" step="0.1" value="1.7" style="width:38px">
-      </div>
-      <div class="pt-group">
-        <button class="p-tbtn" id="boldBtn">B</button>
-        <button class="p-tbtn" id="guideBtn">가이드</button>
-        <button class="p-tbtn" id="pSearchBtn">🔍</button>
-      </div>
-    </div>
-
-    <!-- 프롬프터 검색바 -->
-    <div id="promptSearchBar">
-      <input type="text" id="promptSearchInput" placeholder="검색어 입력...">
-      <span class="s-info" id="psi">0 / 0</span>
-      <button class="ss-btn" id="pPrev">▲</button>
-      <button class="ss-btn" id="pNext">▼</button>
-      <button class="ss-btn" id="pClose">✕</button>
-    </div>
-
+  <!-- Prompter -->
+  <div id="prompterWrap">
     <div id="prompter">
-      <div id="prompterScroller">
-        <div id="prompterContent"></div>
-      </div>
+      <div id="prompterContent"></div>
     </div>
-
-    <div id="guideLine"></div>
     <div id="posBar"><div id="posThumb"></div></div>
-
+    <div id="speedHud" id="speedHud">정지</div>
   </div>
+</div>
 
+<!-- Edit Modal -->
+<div id="editModal">
+  <div id="editBox">
+    <h2>✏️ 스크립트 편집</h2>
+    <textarea id="editTextarea"></textarea>
+    <div class="row">
+      <button class="btn" id="editCancel">취소</button>
+      <button class="btn active" id="editSave">저장 및 위치 유지</button>
+    </div>
+  </div>
 </div>
 
 <script>
 // ── STATE ──
-const S = {
-  text: `오프닝\n환영합니다. 카메라를 바라보며 자연스럽게 시작하세요.\n\n[챕터 1]\n첫 번째 섹션 내용입니다. 스크립트를 입력하거나 파일을 불러오세요.\n\n작품설명\n이 작품에 대한 설명을 입력합니다.\n\n[챕터 2]\n두 번째 섹션입니다.\n\n엔딩\n마무리 멘트와 함께 클로징합니다.`,
-  fs: 48, w: 80, lh: 1.7, bold: false,
-  sHits: [], sIdx: -1,
-  pHits: [], pIdx: -1,
+const state = {
+  text: `안녕하세요, 여러분.\n\n오늘 발표에 오신 것을 환영합니다.\n\n저는 오늘 우리 팀이 지난 한 달간 준비한 프로젝트에 대해 말씀드리려고 합니다.\n\n먼저 배경 설명부터 시작하겠습니다.\n\n우리가 이 프로젝트를 시작하게 된 이유는 명확합니다.\n\n고객들의 요구사항이 빠르게 변화하고 있으며, 우리는 그에 맞춰 발 빠르게 대응해야 했습니다.\n\n팀원 모두가 밤낮으로 노력한 결과, 오늘 이 자리에서 여러분께 결과물을 보여드릴 수 있게 되었습니다.\n\n다음으로 주요 기능에 대해 설명드리겠습니다.\n\n첫 번째 기능은 실시간 데이터 분석입니다.\n\n두 번째 기능은 자동화된 보고서 생성입니다.\n\n세 번째 기능은 다양한 플랫폼과의 연동입니다.\n\n이 세 가지 기능이 결합되면 업무 효율이 크게 향상될 것으로 기대됩니다.\n\n마지막으로 향후 계획에 대해 말씀드리겠습니다.\n\n다음 분기에는 베타 테스트를 진행할 예정이며, 여러분의 소중한 피드백을 반영하여 더 나은 제품을 만들어 나가겠습니다.\n\n감사합니다.`,
+  fontSize: 48,
+  width: 80,
+  speed: 2,
+  lineHeight: 1.7,
+  bold: false,
+  playing: false,
+  mirror: false,
+  searchHits: [],
+  currentHit: -1,
+  rafId: null,
+  lastTs: null,
+  // position tracking: ratio 0~1
+  scrollRatio: 0,
 };
 
-const scriptInput  = document.getElementById('scriptInput');
-const scriptHL     = document.getElementById('scriptHighlight');
-const fontInput    = document.getElementById('fontInput');
-const widthInput   = document.getElementById('widthInput');
-const lineInput    = document.getElementById('lineInput');
-const boldBtn      = document.getElementById('boldBtn');
-const prompter     = document.getElementById('prompterScroller');
-
-const PC           = document.getElementById('prompterContent');
-const slideWrap    = document.getElementById('slideWrap');
+// ── ELEMENTS ──
+const prompter      = document.getElementById('prompter');
+const prompterContent = document.getElementById('prompterContent');
+const scriptInput   = document.getElementById('scriptInput');
+const fontRange     = document.getElementById('fontRange');
+const fontVal       = document.getElementById('fontVal');
+const widthRange    = document.getElementById('widthRange');
+const widthVal      = document.getElementById('widthVal');
+const speedRange    = document.getElementById('speedRange');
+const speedVal      = document.getElementById('speedVal');
+const lineRange     = document.getElementById('lineRange');
+const lineVal       = document.getElementById('lineVal');
+const boldBtn       = document.getElementById('boldBtn');
+const playBtn       = document.getElementById('playBtn');
+const resetBtn      = document.getElementById('resetBtn');
+const mirrorBtn     = document.getElementById('mirrorBtn');
+const panelToggle   = document.getElementById('panelToggle');
+const editBtn       = document.getElementById('editBtn');
+const searchToggle  = document.getElementById('searchToggle');
+const searchBar     = document.getElementById('searchBar');
+const searchInput   = document.getElementById('searchInput');
+const searchInfo    = document.getElementById('searchInfo');
+const prevHit       = document.getElementById('prevHit');
+const nextHit       = document.getElementById('nextHit');
+const closeSearch   = document.getElementById('closeSearch');
+const posThumb      = document.getElementById('posThumb');
+const speedHud      = document.getElementById('speedHud');
+const scriptPanel   = document.getElementById('scriptPanel');
+const resizeHandle  = document.getElementById('resizeHandle');
+const editModal     = document.getElementById('editModal');
+const editTextarea  = document.getElementById('editTextarea');
+const editSave      = document.getElementById('editSave');
+const editCancel    = document.getElementById('editCancel');
 
 // ── INIT ──
-scriptInput.value = S.text;
-syncPrompter();
+scriptInput.value = state.text;
+renderPrompter();
+applyStyles();
 
-// ── TAB ──
-function showTab(tab) {
-  document.getElementById('tabEdit').classList.toggle('active', tab==='edit');
-  document.getElementById('tabPrompt').classList.toggle('active', tab==='prompt');
-  slideWrap.classList.toggle('show-prompt', tab==='prompt');
+// ── RENDER ──
+function renderPrompter(keepRatio) {
+  const ratio = keepRatio !== undefined ? keepRatio : getScrollRatio();
+  prompterContent.innerHTML = escapeAndMark(state.text);
+  // re-highlight if search active
+  if (searchBar.classList.contains('open') && searchInput.value) {
+    applySearch(searchInput.value, false);
+  }
+  // restore scroll position
+  requestAnimationFrame(() => {
+    setScrollRatio(ratio);
+    updatePosBar();
+  });
 }
 
-// ── HTML 변환 ──
-function toHtml(t) {
-  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+function escapeAndMark(text) {
+  return text
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
 }
 
-// ── 프롬프터 동기화 ──
-function syncPrompter() {
-  PC.innerHTML = toHtml(S.text);
-  PC.style.fontSize   = S.fs + 'px';
-  PC.style.width      = S.w + '%';
-  PC.style.lineHeight = S.lh;
-  PC.style.fontWeight = S.bold ? '700' : '400';
+function applyStyles(keepRatio) {
+  const ratio = keepRatio !== undefined ? keepRatio : getScrollRatio();
+  prompterContent.style.fontSize = state.fontSize + 'px';
+  prompterContent.style.width = state.width + '%';
+  prompterContent.style.lineHeight = state.lineHeight;
+  prompterContent.style.fontWeight = state.bold ? '700' : '400';
+  requestAnimationFrame(() => setScrollRatio(ratio));
 }
 
-// ── 스크립트 입력 ──
-scriptInput.addEventListener('input', () => {
-  S.text = scriptInput.value;
-  syncPrompter();
-  const cr = (scriptInput.selectionStart||0) / Math.max(1, S.text.length);
-  requestAnimationFrame(() => { setRatio(cr); updateBar(); });
-  if (document.getElementById('scriptSearchInput').value)
-    renderScriptHL(document.getElementById('scriptSearchInput').value, S.sIdx);
-});
-scriptInput.addEventListener('scroll', () => { scriptHL.scrollTop = scriptInput.scrollTop; });
+// ── SCROLL RATIO ──
+function getScrollRatio() {
+  const max = prompter.scrollHeight - prompter.clientHeight;
+  return max <= 0 ? 0 : prompter.scrollTop / max;
+}
 
-// ── 설정 컨트롤 ──
-fontInput.addEventListener('change', () => {
-  S.fs = Math.min(200, Math.max(10, +fontInput.value||48));
-  fontInput.value = S.fs; syncPrompter();
+function setScrollRatio(ratio) {
+  const max = prompter.scrollHeight - prompter.clientHeight;
+  prompter.scrollTop = ratio * max;
+}
+
+function updatePosBar() {
+  const ratio = getScrollRatio();
+  const barH = document.getElementById('posBar').clientHeight;
+  const thumbH = Math.max(20, barH * (prompter.clientHeight / prompter.scrollHeight));
+  posThumb.style.height = thumbH + 'px';
+  posThumb.style.top = (ratio * (barH - thumbH)) + 'px';
+}
+
+// ── CONTROLS ──
+fontRange.addEventListener('input', () => {
+  state.fontSize = +fontRange.value;
+  fontVal.textContent = state.fontSize;
+  applyStyles(getScrollRatio());
 });
-widthInput.addEventListener('change', () => {
-  S.w = Math.min(100, Math.max(20, +widthInput.value||80));
-  widthInput.value = S.w; syncPrompter();
+
+widthRange.addEventListener('input', () => {
+  state.width = +widthRange.value;
+  widthVal.textContent = state.width + '%';
+  applyStyles(getScrollRatio());
 });
-lineInput.addEventListener('change', () => {
-  S.lh = parseFloat(Math.min(4,Math.max(1,+lineInput.value||1.7)).toFixed(1));
-  lineInput.value = S.lh; syncPrompter();
+
+speedRange.addEventListener('input', () => {
+  state.speed = +speedRange.value;
+  speedVal.textContent = state.speed;
+  updateSpeedHud();
 });
+
+lineRange.addEventListener('input', () => {
+  state.lineHeight = +lineRange.value;
+  lineVal.textContent = state.lineHeight.toFixed(1);
+  applyStyles(getScrollRatio());
+});
+
 boldBtn.addEventListener('click', () => {
-  S.bold = !S.bold; boldBtn.classList.toggle('active', S.bold); syncPrompter();
+  state.bold = !state.bold;
+  boldBtn.classList.toggle('active', state.bold);
+  applyStyles(getScrollRatio());
 });
 
-// 드래그 수치 조절
-function drag(el, min, max, step, cb) {
-  let sx, sv, moved;
-  const cl = v => parseFloat(Math.min(max,Math.max(min,Math.round(v/step)*step)).toFixed(step<1?1:0));
-  el.addEventListener('mousedown', e => {
-    if (document.activeElement===el) return;
-    sx=e.clientX; sv=parseFloat(el.value); moved=false; e.preventDefault();
-    const mm = e => { const d=e.clientX-sx; if(Math.abs(d)>3){moved=true;el.value=cl(sv+d*step);cb(cl(sv+d*step));} };
-    const mu = () => { document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); if(!moved)el.focus(); };
-    document.addEventListener('mousemove',mm); document.addEventListener('mouseup',mu);
-  });
-  el.addEventListener('touchstart', e => {
-    if (document.activeElement===el) return;
-    sx=e.touches[0].clientX; sv=parseFloat(el.value); moved=false;
-    const tm = e => { const d=e.touches[0].clientX-sx; if(Math.abs(d)>3){e.preventDefault();moved=true;el.value=cl(sv+d*step);cb(cl(sv+d*step));} };
-    const te = () => { el.removeEventListener('touchmove',tm); el.removeEventListener('touchend',te); if(!moved)el.focus(); };
-    el.addEventListener('touchmove',tm,{passive:false}); el.addEventListener('touchend',te);
-  },{passive:true});
-}
-drag(fontInput,  10, 200, 1,   v=>{S.fs=v;  syncPrompter();});
-drag(widthInput, 20, 100, 1,   v=>{S.w=v;   syncPrompter();});
-drag(lineInput,  1,  4,   0.1, v=>{S.lh=v;  syncPrompter();});
-
-// ── 프롬프터 스크롤 ──
-function getRatio() { const m=prompter.scrollHeight-prompter.clientHeight; return m<=0?0:prompter.scrollTop/m; }
-function setRatio(r) { const m=prompter.scrollHeight-prompter.clientHeight; prompter.scrollTop=r*m; }
-function updateBar() {
-  const r=getRatio(), bh=document.getElementById('posBar').clientHeight;
-  const th=Math.max(24,bh*(prompter.clientHeight/Math.max(1,prompter.scrollHeight)));
-  const t=document.getElementById('posThumb');
-  t.style.height=th+'px'; t.style.top=(r*(bh-th))+'px';
-}
-prompter.addEventListener('scroll', updateBar);
-window.addEventListener('orientationchange',()=>{const r=getRatio();setTimeout(()=>setRatio(r),300);});
-window.addEventListener('resize',()=>{const r=getRatio();requestAnimationFrame(()=>setRatio(r));});
-
-// ── 가이드선 ──
-document.getElementById('guideBtn').addEventListener('click',()=>{
-  const g=document.getElementById('guideLine');
-  g.classList.toggle('show');
-  document.getElementById('guideBtn').classList.toggle('active',g.classList.contains('show'));
+scriptInput.addEventListener('input', () => {
+  const ratio = getScrollRatio();
+  state.text = scriptInput.value;
+  renderPrompter(ratio);
 });
 
-// ── 스크립트 검색 ──
-document.getElementById('scriptSearchToggle').addEventListener('click',()=>{
-  const bar=document.getElementById('scriptSearchBar');
-  bar.classList.toggle('open');
-  if(bar.classList.contains('open')) document.getElementById('scriptSearchInput').focus();
-  else clearSS();
-});
-document.getElementById('sClose').addEventListener('click',()=>{document.getElementById('scriptSearchBar').classList.remove('open');clearSS();});
-document.getElementById('scriptSearchInput').addEventListener('input',e=>runSS(e.target.value));
-document.getElementById('sPrev').addEventListener('click',()=>jumpSS(S.sIdx-1));
-document.getElementById('sNext').addEventListener('click',()=>jumpSS(S.sIdx+1));
+prompter.addEventListener('scroll', updatePosBar);
 
-function runSS(q) {
-  S.sHits=[]; S.sIdx=-1;
-  if(!q){document.getElementById('ssi').textContent='0 / 0';renderScriptHL('',-1);return;}
-  const lo=scriptInput.value.toLowerCase(),ql=q.toLowerCase();
-  let p=0; while((p=lo.indexOf(ql,p))!==-1){S.sHits.push(p);p+=ql.length;}
-  document.getElementById('ssi').textContent=`0 / ${S.sHits.length}`;
-  if(S.sHits.length){S.sIdx=0;document.getElementById('ssi').textContent=`1 / ${S.sHits.length}`;}
-  renderScriptHL(q,S.sIdx);
-  if(S.sHits.length)scrollSS();
+function updateSpeedHud() {
+  speedHud.textContent = state.playing ? `▶ ×${state.speed}` : '정지';
 }
-function jumpSS(i) {
-  if(!S.sHits.length) return;
-  S.sIdx=(i+S.sHits.length)%S.sHits.length;
-  document.getElementById('ssi').textContent=`${S.sIdx+1} / ${S.sHits.length}`;
-  renderScriptHL(document.getElementById('scriptSearchInput').value,S.sIdx);
-  scrollSS();
-}
-function scrollSS() {
-  requestAnimationFrame(()=>{
-    const m=scriptHL.querySelector('mark.cur'); if(!m) return;
-    const top=m.offsetTop-scriptHL.clientHeight/2+m.offsetHeight;
-    scriptHL.scrollTop=Math.max(0,top); scriptInput.scrollTop=scriptHL.scrollTop;
-  });
-}
-function renderScriptHL(q,ci) {
-  if(!q){scriptHL.innerHTML='';return;}
-  const esc=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  const rx=new RegExp(`(${esc})`,'gi'); let i=0;
-  scriptHL.innerHTML=scriptInput.value
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(rx,m=>`<mark class="${i++===ci?'cur':''}">${m}</mark>`);
-  scriptHL.scrollTop=scriptInput.scrollTop;
-}
-function clearSS(){S.sHits=[];S.sIdx=-1;document.getElementById('scriptSearchInput').value='';document.getElementById('ssi').textContent='0 / 0';scriptHL.innerHTML='';}
 
-// ── 프롬프터 검색 ──
-document.getElementById('pSearchBtn').addEventListener('click',()=>{
-  const bar=document.getElementById('promptSearchBar');
-  bar.classList.toggle('open');
-  if(bar.classList.contains('open')) document.getElementById('promptSearchInput').focus();
-  else clearPS();
-});
-document.getElementById('pClose').addEventListener('click',()=>{document.getElementById('promptSearchBar').classList.remove('open');clearPS();});
-document.getElementById('promptSearchInput').addEventListener('input',e=>runPS(e.target.value));
-document.getElementById('pPrev').addEventListener('click',()=>jumpPS(S.pIdx-1));
-document.getElementById('pNext').addEventListener('click',()=>jumpPS(S.pIdx+1));
-
-function runPS(q) {
-  clearPSHL(); S.pHits=[]; S.pIdx=-1;
-  if(!q){document.getElementById('psi').textContent='0 / 0';return;}
-  const esc=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  const rx=new RegExp(`(${esc})`,'gi'); let i=0;
-  PC.innerHTML=toHtml(S.text).replace(rx,m=>`<mark class="hit" data-i="${i++}">${m}</mark>`);
-  S.pHits=Array.from(PC.querySelectorAll('mark.hit'));
-  document.getElementById('psi').textContent=`0 / ${S.pHits.length}`;
-  if(S.pHits.length) jumpPS(0);
-}
-function jumpPS(i) {
-  if(!S.pHits.length) return;
-  S.pHits[S.pIdx]?.classList.remove('cur');
-  S.pIdx=(i+S.pHits.length)%S.pHits.length;
-  const el=S.pHits[S.pIdx]; el.classList.add('cur');
-  document.getElementById('psi').textContent=`${S.pIdx+1} / ${S.pHits.length}`;
-  prompter.scrollTo({top:el.offsetTop-prompter.clientHeight/2,behavior:'smooth'});
-  setTimeout(updateBar,350);
-}
-function clearPSHL(){PC.innerHTML=toHtml(S.text);}
-function clearPS(){S.pHits=[];S.pIdx=-1;document.getElementById('promptSearchInput').value='';document.getElementById('psi').textContent='0 / 0';clearPSHL();}
-
-// ── 파일 업로드 ──
-document.getElementById('uploadBtn').addEventListener('click',()=>document.getElementById('fileInput').click());
-document.getElementById('fileInput').addEventListener('change',async()=>{
-  const file=document.getElementById('fileInput').files[0]; if(!file) return;
-  document.getElementById('fileInput').value='';
-  const ext=file.name.split('.').pop().toLowerCase();
-  const st=document.getElementById('uploadStatus');
-  st.className=''; st.textContent='읽는 중...';
-  try {
-    let text = ext==='txt' ? await readTxt(file) : ext==='docx' ? await readDocx(file) : (()=>{throw new Error('docx·txt만 가능');})();
-    S.text=text.trim(); scriptInput.value=S.text;
-    syncPrompter();
-    st.style.color='var(--accent)'; st.textContent='✓ '+file.name;
-    setTimeout(()=>st.textContent='',3000);
-  } catch(e){ st.style.color='var(--red)'; st.textContent='⚠ '+e.message; }
-});
-
-function readTxt(f){
-  return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=()=>rej(new Error('읽기 실패'));r.readAsText(f,'UTF-8');});
-}
-async function readDocx(f){
-  if(!window.mammoth){
-    await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';s.onload=res;s.onerror=()=>rej(new Error('라이브러리 로드 실패'));document.head.appendChild(s);});
-  }
-  const ab=await f.arrayBuffer();
-  const r=await mammoth.convertToHtml({arrayBuffer:ab});
-  if(!r.value) throw new Error('텍스트 추출 실패');
-  return parseDocx(r.value);
-}
-function parseDocx(html){
-  const SR=/^(오프닝|작품설명|엔딩)$/,BR=/^\[(챕터|작품)\s*\S*\]$/;
-  const doc=new DOMParser().parseFromString(html,'text/html');
-  const res=[]; const brk=()=>{if(res.length){res.push('');res.push('');}};
-  const col=t=>t.split(/\n/).map(l=>l.trim()).filter(Boolean).join(' ');
-  const tables=doc.querySelectorAll('table');
-  if(tables.length){
-    tables.forEach(tb=>tb.querySelectorAll('tr').forEach(row=>{
-      const cs=row.querySelectorAll('td,th');if(!cs.length)return;
-      const L=cs[0]?.innerText.trim()||'',R=cs[1]?.innerText.trim()||'';
-      if(SR.test(L)||BR.test(L)){brk();res.push(L);if(R)res.push(col(R));}
-      else{const c=R||L;if(c)res.push(col(c));}
-    }));
+// ── PLAY / PAUSE ──
+function togglePlay() {
+  state.playing = !state.playing;
+  playBtn.textContent = state.playing ? '⏸' : '▶';
+  playBtn.classList.toggle('active', state.playing);
+  updateSpeedHud();
+  if (state.playing) {
+    state.lastTs = null;
+    state.rafId = requestAnimationFrame(scroll);
   } else {
-    let buf=[];
-    doc.querySelectorAll('p').forEach(p=>{
-      const t=p.innerText.trim();if(!t)return;
-      if(SR.test(t)||BR.test(t)){if(buf.length){res.push(buf.join(' '));buf=[];}brk();res.push(t);}
-      else buf.push(t);
-    });
-    if(buf.length)res.push(buf.join(' '));
+    cancelAnimationFrame(state.rafId);
   }
-  return res.join('\n');
 }
 
-
-
-// ── 핀치 줌 (JS 직접 구현) ──
-// prompterScroller를 scale+translate로 확대/축소
-// 1손가락: 스크롤  /  2손가락: 핀치줌
-const pWrap = document.getElementById('prompter');
-const pScroll = prompter; // prompterScroller
-
-let gz = 1, gx = 0, gy = 0; // 현재 zoom, pan
-let touch = { active: false, pinching: false, dragging: false,
-  d0: 0, z0: 1, x0: 0, y0: 0, px0: 0, py0: 0,
-  mx: 0, my: 0, sx0: 0 };
-
-function dist2(t) {
-  return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
-}
-function mid2(t) {
-  return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
-}
-function applyGZ() {
-  // 스크롤러 자체를 scale+translate
-  // pan 범위 제한
-  const ww = pWrap.clientWidth, wh = pWrap.clientHeight;
-  const cw = pScroll.scrollWidth, ch = pScroll.scrollHeight;
-  const scaledW = cw * gz, scaledH = ch * gz;
-  gx = scaledW  <= ww ? (ww - scaledW)  / 2 : Math.min(0, Math.max(ww - scaledW,  gx));
-  gy = scaledH  <= wh ? (wh - scaledH)  / 2 : Math.min(0, Math.max(wh - scaledH, gy));
-  pScroll.style.transform = `translate(${gx}px, ${gy}px) scale(${gz})`;
-}
-
-pWrap.addEventListener('touchstart', e => {
-  e.preventDefault();
-  if (e.touches.length === 2) {
-    touch.pinching = true; touch.dragging = false;
-    touch.d0 = dist2(e.touches); touch.z0 = gz;
-    touch.px0 = gx; touch.py0 = gy;
-    const m = mid2(e.touches);
-    touch.mx = m.x - pWrap.getBoundingClientRect().left;
-    touch.my = m.y - pWrap.getBoundingClientRect().top;
-  } else if (e.touches.length === 1) {
-    touch.dragging = true; touch.pinching = false;
-    touch.x0 = e.touches[0].clientY;
-    touch.sx0 = pScroll.scrollTop; // 스크롤 위치 저장 (zoom=1일때)
-    touch.px0 = gx; touch.py0 = gy;
+function scroll(ts) {
+  if (!state.lastTs) state.lastTs = ts;
+  const dt = ts - state.lastTs;
+  state.lastTs = ts;
+  prompter.scrollTop += state.speed * dt / 16;
+  updatePosBar();
+  // stop at bottom
+  if (prompter.scrollTop >= prompter.scrollHeight - prompter.clientHeight) {
+    state.playing = false;
+    playBtn.textContent = '▶';
+    playBtn.classList.remove('active');
+    updateSpeedHud();
+    return;
   }
-}, { passive: false });
+  state.rafId = requestAnimationFrame(scroll);
+}
 
-pWrap.addEventListener('touchmove', e => {
-  e.preventDefault();
-  if (touch.pinching && e.touches.length === 2) {
-    const d = dist2(e.touches);
-    const m = mid2(e.touches);
-    const rect = pWrap.getBoundingClientRect();
-    const mx = m.x - rect.left, my = m.y - rect.top;
-    const newZ = Math.min(5, Math.max(0.5, touch.z0 * (d / touch.d0)));
-    // 핀치 중심점 기준으로 pan 조정
-    gx = mx - (touch.mx - touch.px0) * (newZ / touch.z0) - touch.mx * (newZ / touch.z0 - 1) + touch.px0 * (newZ / touch.z0);
-    gy = my - (touch.my - touch.py0) * (newZ / touch.z0) - touch.my * (newZ / touch.z0 - 1) + touch.py0 * (newZ / touch.z0);
-    gz = newZ;
-    applyGZ();
-    updateBar();
-  } else if (touch.dragging && e.touches.length === 1) {
-    if (gz <= 1.02) {
-      // 줌 없을 때: 일반 스크롤
-      const dy = touch.x0 - e.touches[0].clientY;
-      pScroll.scrollTop = touch.sx0 + dy;
-    } else {
-      // 줌 상태: pan
-      const dy = e.touches[0].clientY - touch.x0;
-      gy = touch.py0 + dy;
-      applyGZ();
-    }
-    updateBar();
-  }
-}, { passive: false });
-
-pWrap.addEventListener('touchend', e => {
-  if (e.touches.length < 2) touch.pinching = false;
-  if (e.touches.length === 0) touch.dragging = false;
-}, { passive: true });
-
-// ── 키보드 ──
-document.addEventListener('keydown',e=>{
-  if(['TEXTAREA','INPUT'].includes(document.activeElement.tagName)){if(e.key==='Escape')document.activeElement.blur();return;}
-  if((e.ctrlKey||e.metaKey)&&e.key==='f'){e.preventDefault();document.getElementById('pSearchBtn').click();}
+playBtn.addEventListener('click', togglePlay);
+resetBtn.addEventListener('click', () => {
+  prompter.scrollTop = 0;
+  updatePosBar();
 });
+
+// ── MIRROR ──
+mirrorBtn.addEventListener('click', () => {
+  state.mirror = !state.mirror;
+  document.body.classList.toggle('mirror', state.mirror);
+  mirrorBtn.classList.toggle('active', state.mirror);
+});
+
+// ── PANEL TOGGLE ──
+panelToggle.addEventListener('click', () => {
+  scriptPanel.classList.toggle('hidden');
+  panelToggle.classList.toggle('active', !scriptPanel.classList.contains('hidden'));
+  // keep ratio after layout change
+  const ratio = getScrollRatio();
+  requestAnimationFrame(() => setScrollRatio(ratio));
+});
+panelToggle.classList.add('active');
+
+// ── EDIT MODAL ──
+editBtn.addEventListener('click', () => {
+  editTextarea.value = state.text;
+  editModal.classList.add('open');
+  editTextarea.focus();
+});
+
+editSave.addEventListener('click', () => {
+  const ratio = getScrollRatio();
+  state.text = editTextarea.value;
+  scriptInput.value = state.text;
+  editModal.classList.remove('open');
+  renderPrompter(ratio);
+});
+
+editCancel.addEventListener('click', () => {
+  editModal.classList.remove('open');
+});
+
+editModal.addEventListener('click', e => {
+  if (e.target === editModal) editModal.classList.remove('open');
+});
+
+// ── SEARCH ──
+searchToggle.addEventListener('click', openSearch);
+
+function openSearch() {
+  searchBar.classList.add('open');
+  searchInput.focus();
+  searchInput.select();
+}
+
+closeSearch.addEventListener('click', () => {
+  searchBar.classList.remove('open');
+  searchInput.value = '';
+  clearHighlights();
+  searchInfo.textContent = '0 / 0';
+  state.searchHits = [];
+  state.currentHit = -1;
+});
+
+searchInput.addEventListener('input', () => {
+  applySearch(searchInput.value, true);
+});
+
+function applySearch(query, resetIndex) {
+  clearHighlights();
+  state.searchHits = [];
+  state.currentHit = -1;
+
+  if (!query) {
+    searchInfo.textContent = '0 / 0';
+    return;
+  }
+
+  // Highlight in HTML
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escaped})`, 'gi');
+  let idx = 0;
+  prompterContent.innerHTML = escapeAndMark(state.text).replace(regex, (m) => {
+    return `<mark class="hit" data-idx="${idx++}">${m}</mark>`;
+  });
+
+  state.searchHits = Array.from(prompterContent.querySelectorAll('mark.hit'));
+  searchInfo.textContent = `0 / ${state.searchHits.length}`;
+
+  if (resetIndex && state.searchHits.length > 0) {
+    // jump to nearest hit to current scroll position
+    const viewMid = prompter.scrollTop + prompter.clientHeight / 2;
+    let best = 0, bestDist = Infinity;
+    state.searchHits.forEach((el, i) => {
+      const dist = Math.abs(el.offsetTop - viewMid);
+      if (dist < bestDist) { bestDist = dist; best = i; }
+    });
+    jumpToHit(best);
+  }
+}
+
+function jumpToHit(i) {
+  if (!state.searchHits.length) return;
+  if (state.currentHit >= 0 && state.currentHit < state.searchHits.length)
+    state.searchHits[state.currentHit].classList.remove('current');
+  state.currentHit = (i + state.searchHits.length) % state.searchHits.length;
+  const el = state.searchHits[state.currentHit];
+  el.classList.add('current');
+  searchInfo.textContent = `${state.currentHit + 1} / ${state.searchHits.length}`;
+  // scroll so hit is near center
+  const targetTop = el.offsetTop - prompter.clientHeight / 2 + el.offsetHeight / 2;
+  prompter.scrollTo({ top: targetTop, behavior: 'smooth' });
+  setTimeout(updatePosBar, 350);
+}
+
+nextHit.addEventListener('click', () => jumpToHit(state.currentHit + 1));
+prevHit.addEventListener('click', () => jumpToHit(state.currentHit - 1));
+
+function clearHighlights() {
+  // re-render plain text to remove all marks
+  prompterContent.innerHTML = escapeAndMark(state.text);
+}
+
+// ── KEYBOARD SHORTCUTS ──
+document.addEventListener('keydown', e => {
+  // prevent in textareas/inputs
+  const tag = document.activeElement.tagName;
+  if (tag === 'TEXTAREA' || tag === 'INPUT') {
+    if (e.key === 'Escape') {
+      document.activeElement.blur();
+      if (editModal.classList.contains('open')) editModal.classList.remove('open');
+      if (searchBar.classList.contains('open')) closeSearch.click();
+    }
+    return;
+  }
+
+  if (e.ctrlKey && e.key === 'f') { e.preventDefault(); openSearch(); return; }
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); togglePlay(); return; }
+  if (e.key === 'ArrowUp')   { prompter.scrollBy({top: -80, behavior:'smooth'}); }
+  if (e.key === 'ArrowDown') { prompter.scrollBy({top:  80, behavior:'smooth'}); }
+  if (e.key === 'Escape') {
+    if (editModal.classList.contains('open')) editModal.classList.remove('open');
+    if (searchBar.classList.contains('open')) closeSearch.click();
+  }
+});
+
+// ── RESIZE PANEL ──
+let resizing = false, startX = 0, startW = 0;
+resizeHandle.addEventListener('mousedown', e => {
+  resizing = true;
+  startX = e.clientX;
+  startW = scriptPanel.offsetWidth;
+  resizeHandle.classList.add('dragging');
+});
+document.addEventListener('mousemove', e => {
+  if (!resizing) return;
+  const delta = e.clientX - startX;
+  const newW = Math.max(150, Math.min(600, startW + delta));
+  scriptPanel.style.width = newW + 'px';
+});
+document.addEventListener('mouseup', () => {
+  if (resizing) { resizing = false; resizeHandle.classList.remove('dragging'); }
+});
+
+// ── INITIAL SPEEDHUD ──
+updateSpeedHud();
+
+// ── FILE UPLOAD ──
+const uploadBtn    = document.getElementById('uploadBtn');
+const fileInput    = document.getElementById('fileInput');
+const uploadStatus = document.getElementById('uploadStatus');
+
+uploadBtn.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', async () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+  fileInput.value = '';
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  uploadStatus.className = '';
+  uploadStatus.textContent = '읽는 중...';
+
+  try {
+    let text = '';
+    if (ext === 'txt') {
+      text = await readTxt(file);
+    } else if (ext === 'docx') {
+      text = await readDocx(file);
+    } else {
+      throw new Error('docx 또는 txt 파일만 가능합니다');
+    }
+
+    state.text = text.trim();
+    scriptInput.value = state.text;
+    renderPrompter(0);
+    uploadStatus.textContent = '✓ ' + file.name;
+    setTimeout(() => { uploadStatus.textContent = ''; }, 3000);
+  } catch (e) {
+    uploadStatus.className = 'err';
+    uploadStatus.textContent = '⚠ ' + e.message;
+  }
+});
+
+function readTxt(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = () => reject(new Error('파일을 읽을 수 없습니다'));
+    reader.readAsText(file, 'UTF-8');
+  });
+}
+
+async function readDocx(file) {
+  if (!window.mammoth) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+      s.onload = resolve;
+      s.onerror = () => reject(new Error('라이브러리 로드 실패 (인터넷 연결 확인)'));
+      document.head.appendChild(s);
+    });
+  }
+  const arrayBuffer = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer });
+  if (!result.value) throw new Error('텍스트를 추출할 수 없습니다');
+  return result.value;
+}
 </script>
 </body>
 </html>
