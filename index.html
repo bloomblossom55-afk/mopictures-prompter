@@ -16,7 +16,6 @@
     --text: #f0f0f0;
     --muted: #555;
     --panel-w: 320px;
-    --tab-h: 34px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,56 +24,6 @@
     height: 100%;
     max-height: 100%;
     overflow: hidden;
-  }
-
-  /* ── TAB BAR ── */
-  #tabBar {
-    height: var(--tab-h);
-    min-height: var(--tab-h);
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: stretch;
-    flex-shrink: 0;
-    z-index: 100;
-  }
-  .tab-logo {
-    display: flex; align-items: center;
-    padding: 0 12px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px; font-weight: 600;
-    color: var(--accent); letter-spacing: 3px;
-    border-right: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .tab-btn {
-    flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
-    background: none; border: none; cursor: pointer;
-    font-size: 11px; font-weight: 500; color: var(--muted);
-    font-family: inherit; position: relative; transition: color .15s;
-  }
-  .tab-btn.active { color: var(--text); }
-  .tab-btn.active::after {
-    content: ''; position: absolute; bottom: 0; left: 15%; right: 15%;
-    height: 2px; background: var(--accent); border-radius: 2px 2px 0 0;
-  }
-
-  /* ── SLIDE WRAP ── */
-  #slideWrap {
-    flex: 1; display: flex; flex-direction: row;
-    width: 200%; overflow: hidden; min-height: 0;
-    transition: transform .25s cubic-bezier(.4,0,.2,1);
-  }
-  #slideWrap.show-prompt { transform: translateX(-50%); }
-
-  /* 각 페이지 */
-  #editPage {
-    width: 50%; flex-shrink: 0;
-    display: flex; flex-direction: column; overflow: hidden;
-  }
-  #promptPage {
-    width: 50%; flex-shrink: 0;
-    display: flex; flex-direction: column; overflow: hidden;
   }
   body {
     background: var(--bg);
@@ -420,38 +369,6 @@
     white-space: nowrap;
   }
 
-  /* ── PROMPT TOOLBAR ── */
-  #promptToolbar {
-    height: 40px; min-height: 40px;
-    background: #0a0a0a;
-    border-bottom: 1px solid #1a1a1a;
-    display: flex; align-items: center; gap: 0;
-    padding: 0 8px; flex-shrink: 0;
-  }
-  #promptPage { background: #000; }
-  #promptPage .ctrl-group { border-left-color: #1a1a1a; }
-  #promptPage .ctrl-label { color: #444; }
-  #promptPage .num-unit { color: #444; }
-  #promptPage .num-input { background: #111; border-color: #2a2a2a; }
-  #promptPage .btn { border-color: #2a2a2a; color: #666; }
-  #promptPage .btn:hover { border-color: var(--accent); color: var(--accent); }
-  #promptPage .btn.active { background: var(--accent); color: #000; }
-
-  #prompter {
-    position: absolute; inset: 0;
-    overflow-y: auto; overflow-x: hidden;
-    padding: 60px 0 80px;
-    scrollbar-width: none;
-    touch-action: pan-y;
-  }
-  #prompter::-webkit-scrollbar { display: none; }
-  #prompterContent {
-    margin: 0 auto; color: #fff !important;
-    word-break: break-word; display: block;
-  }
-  #prompterContent mark.hit { background: rgba(232,201,109,.25); color: var(--accent); border-radius: 2px; }
-  #prompterContent mark.hit.current { background: var(--accent); color: #000; }
-
   /* resize handle */
   #resizeHandle {
     width: 5px;
@@ -471,28 +388,38 @@
 </head>
 <body>
 
-<!-- TAB BAR -->
-<div id="tabBar">
-  <div class="tab-logo">MO</div>
-  <button class="tab-btn active" id="tabEdit" onclick="showTab('edit')">✏️ 편집</button>
-  <button class="tab-btn" id="tabPrompt" onclick="showTab('prompt')">📺 프롬프터</button>
-</div>
-
-<div id="slideWrap">
-
-<!-- ── 편집 탭 ── -->
-<div id="editPage">
-
-<!-- TOP BAR (편집탭: 파일+검색만) -->
+<!-- TOP BAR -->
 <div id="topbar">
   <span class="logo">PROMPTER</span>
+
+  <div class="ctrl-group">
+    <span class="ctrl-label">글자</span>
+    <input class="num-input" type="number" id="fontInput" min="10" max="200" value="48">
+    <span class="num-unit">px</span>
+  </div>
+
+  <div class="ctrl-group">
+    <span class="ctrl-label">너비</span>
+    <input class="num-input" type="number" id="widthInput" min="20" max="100" value="80">
+    <span class="num-unit">%</span>
+  </div>
+
+  <div class="ctrl-group">
+    <span class="ctrl-label">줄간격</span>
+    <input class="num-input" type="number" id="lineInput" min="1" max="4" step="0.1" value="1.7" style="width:42px">
+  </div>
+
+  <div class="ctrl-group">
+    <button class="btn" id="boldBtn" title="볼드체" style="font-weight:700;font-size:13px;min-width:28px">B</button>
+  </div>
+
   <div class="ctrl-group" style="gap:5px">
-    <button class="btn" id="panelToggle" title="스크립트 패널">📝 스크립트</button>
     <button class="btn" id="searchToggle" title="검색 (Ctrl+F)">🔍 검색</button>
+    <button class="btn" id="panelToggle" title="스크립트 패널">📝 스크립트</button>
   </div>
 </div>
 
-<!-- SEARCH BAR (프롬프터 검색) -->
+<!-- SEARCH BAR -->
 <div id="searchBar">
   <span style="color:var(--accent2);font-size:12px;white-space:nowrap">🔍 검색</span>
   <input type="text" id="searchInput" placeholder="검색어 입력...">
@@ -504,6 +431,7 @@
 
 <!-- MAIN -->
 <div id="main">
+  <!-- Script panel -->
   <div id="scriptPanel">
     <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between">
       <span>스크립트</span>
@@ -532,58 +460,18 @@
 준비되셨나요?" style="position:relative;z-index:2;background:transparent;"></textarea>
     </div>
   </div>
+
+  <!-- Resize handle -->
   <div id="resizeHandle"></div>
-  <div id="prompterWrap" style="display:none"></div>
-</div>
 
-</div><!-- /editPage -->
-
-<!-- ── 프롬프터 탭 ── -->
-<div id="promptPage">
-
-<!-- 프롬프터 설정 툴바 -->
-<div id="promptToolbar">
-  <span class="logo" style="font-size:10px;padding:0 10px;border-right:1px solid var(--border)">MO</span>
-  <div class="ctrl-group">
-    <span class="ctrl-label">글자</span>
-    <input class="num-input" type="number" id="fontInput" min="10" max="200" value="48">
-    <span class="num-unit">px</span>
-  </div>
-  <div class="ctrl-group">
-    <span class="ctrl-label">너비</span>
-    <input class="num-input" type="number" id="widthInput" min="20" max="100" value="80">
-    <span class="num-unit">%</span>
-  </div>
-  <div class="ctrl-group">
-    <span class="ctrl-label">줄간격</span>
-    <input class="num-input" type="number" id="lineInput" min="1" max="4" step="0.1" value="1.7" style="width:40px">
-  </div>
-  <div class="ctrl-group">
-    <button class="btn" id="boldBtn" style="font-weight:700;font-size:13px;min-width:28px">B</button>
-    <button class="btn" id="promptSearchToggle">🔍</button>
+  <!-- Prompter -->
+  <div id="prompterWrap">
+    <div id="prompter">
+      <div id="prompterContent"></div>
+    </div>
+    <div id="posBar"><div id="posThumb"></div></div>
   </div>
 </div>
-
-<!-- 프롬프터 검색바 -->
-<div id="promptSearchBar" style="display:none;align-items:center;gap:6px;padding:5px 10px;background:var(--surface);border-bottom:1px solid var(--border);">
-  <input type="text" id="promptSearchInput" placeholder="검색어 입력..." style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:13px;padding:3px 8px;outline:none;font-family:inherit;">
-  <span id="promptSearchInfo" style="font-size:10px;color:var(--muted);min-width:40px;text-align:center;font-family:'JetBrains Mono',monospace;">0 / 0</span>
-  <button class="btn" id="promptPrevHit">▲</button>
-  <button class="btn" id="promptNextHit">▼</button>
-  <button class="btn" id="promptCloseSearch">✕</button>
-</div>
-
-<!-- 프롬프터 본체 -->
-<div id="prompterWrap2" style="flex:1;overflow:hidden;position:relative;background:#000;min-height:0;">
-  <div id="prompter">
-    <div id="prompterContent"></div>
-  </div>
-  <div id="posBar"><div id="posThumb"></div></div>
-</div>
-
-</div><!-- /promptPage -->
-
-</div><!-- /slideWrap -->
 
 
 
@@ -1144,171 +1032,6 @@ function formatScript(raw) {
 
   return result.join('\n');
 }
-
-// ── TAB SWITCH ──
-function showTab(tab) {
-  document.getElementById('tabEdit').classList.toggle('active', tab==='edit');
-  document.getElementById('tabPrompt').classList.toggle('active', tab==='prompt');
-  document.getElementById('slideWrap').classList.toggle('show-prompt', tab==='prompt');
-  if (tab === 'prompt') syncPrompterContent();
-}
-
-// ── 프롬프터 탭 콘텐츠 동기화 ──
-function syncPrompterContent() {
-  const PC = document.getElementById('prompterContent');
-  PC.innerHTML = escapeAndMark(state.text);
-  PC.style.fontSize   = state.fontSize + 'px';
-  PC.style.width      = state.width + '%';
-  PC.style.lineHeight = state.lineHeight;
-  PC.style.fontWeight = state.bold ? '700' : '400';
-}
-
-// 스크립트 수정 시 프롬프터도 실시간 반영
-const _origScriptInput = document.getElementById('scriptInput');
-_origScriptInput.addEventListener('input', () => {
-  const PC = document.getElementById('prompterContent');
-  if (PC) {
-    PC.innerHTML = escapeAndMark(state.text);
-    PC.style.fontSize   = state.fontSize + 'px';
-    PC.style.width      = state.width + '%';
-    PC.style.lineHeight = state.lineHeight;
-    PC.style.fontWeight = state.bold ? '700' : '400';
-  }
-});
-
-// ── 프롬프터 탭 설정 컨트롤 ──
-// 기존 컨트롤 change 이벤트에 syncPrompterContent 추가 연결
-fontInput.addEventListener('change', () => syncPrompterContent());
-widthInput.addEventListener('change', () => syncPrompterContent());
-lineInput.addEventListener('change', () => syncPrompterContent());
-boldBtn.addEventListener('click', () => syncPrompterContent());
-
-// ── 프롬프터 탭 스크롤/포지션바 ──
-const pPrompter = document.getElementById('prompter');
-const pPosThumb = document.getElementById('posThumb');
-function updatePosBar2() {
-  const max = pPrompter.scrollHeight - pPrompter.clientHeight;
-  const ratio = max <= 0 ? 0 : pPrompter.scrollTop / max;
-  const barH = document.getElementById('posBar').clientHeight;
-  const thumbH = Math.max(20, barH * (pPrompter.clientHeight / Math.max(1, pPrompter.scrollHeight)));
-  pPosThumb.style.height = thumbH + 'px';
-  pPosThumb.style.top = (ratio * (barH - thumbH)) + 'px';
-}
-pPrompter.addEventListener('scroll', updatePosBar2);
-
-// orientation 유지
-window.addEventListener('orientationchange', () => {
-  const max = pPrompter.scrollHeight - pPrompter.clientHeight;
-  const r = max <= 0 ? 0 : pPrompter.scrollTop / max;
-  setTimeout(() => { pPrompter.scrollTop = r * (pPrompter.scrollHeight - pPrompter.clientHeight); }, 300);
-});
-
-// ── 프롬프터 탭 검색 ──
-let pHits = [], pIdx = -1;
-document.getElementById('promptSearchToggle').addEventListener('click', () => {
-  const bar = document.getElementById('promptSearchBar');
-  const open = bar.style.display === 'none';
-  bar.style.display = open ? 'flex' : 'none';
-  if (open) document.getElementById('promptSearchInput').focus();
-  else clearPSearch();
-});
-document.getElementById('promptCloseSearch').addEventListener('click', () => {
-  document.getElementById('promptSearchBar').style.display = 'none';
-  clearPSearch();
-});
-document.getElementById('promptSearchInput').addEventListener('input', e => runPSearch(e.target.value));
-document.getElementById('promptPrevHit').addEventListener('click', () => jumpPHit(pIdx - 1));
-document.getElementById('promptNextHit').addEventListener('click', () => jumpPHit(pIdx + 1));
-
-function runPSearch(q) {
-  const PC = document.getElementById('prompterContent');
-  PC.innerHTML = escapeAndMark(state.text);
-  pHits = []; pIdx = -1;
-  if (!q) { document.getElementById('promptSearchInfo').textContent = '0 / 0'; return; }
-  const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const rx = new RegExp(`(${esc})`, 'gi'); let i = 0;
-  PC.innerHTML = escapeAndMark(state.text).replace(rx, m => `<mark class="hit" data-i="${i++}">${m}</mark>`);
-  pHits = Array.from(PC.querySelectorAll('mark.hit'));
-  document.getElementById('promptSearchInfo').textContent = `0 / ${pHits.length}`;
-  if (pHits.length) jumpPHit(0);
-}
-function jumpPHit(i) {
-  if (!pHits.length) return;
-  pHits[pIdx]?.classList.remove('current');
-  pIdx = (i + pHits.length) % pHits.length;
-  pHits[pIdx].classList.add('current');
-  document.getElementById('promptSearchInfo').textContent = `${pIdx + 1} / ${pHits.length}`;
-  pPrompter.scrollTo({ top: pHits[pIdx].offsetTop - pPrompter.clientHeight / 2, behavior: 'smooth' });
-  setTimeout(updatePosBar2, 350);
-}
-function clearPSearch() {
-  pHits = []; pIdx = -1;
-  document.getElementById('promptSearchInput').value = '';
-  document.getElementById('promptSearchInfo').textContent = '0 / 0';
-  document.getElementById('prompterContent').innerHTML = escapeAndMark(state.text);
-}
-
-// ── 핀치 줌 (프롬프터 탭) ──
-const pWrap2 = document.getElementById('prompterWrap2');
-let gz = 1, gx = 0, gy = 0;
-let pTouch = { pinching: false, dragging: false, d0: 0, z0: 1, px0: 0, py0: 0, mx: 0, my: 0, sx0: 0, x0: 0 };
-
-function ptDist(t) { return Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY); }
-function ptMid(t)  { return {x:(t[0].clientX+t[1].clientX)/2, y:(t[0].clientY+t[1].clientY)/2}; }
-function applyGZ() {
-  const ww=pWrap2.clientWidth, wh=pWrap2.clientHeight;
-  const sw=pPrompter.scrollWidth*gz, sh=pPrompter.scrollHeight*gz;
-  gx = sw<=ww ? (ww-sw)/2 : Math.min(0,Math.max(ww-sw,gx));
-  gy = sh<=wh ? (wh-sh)/2 : Math.min(0,Math.max(wh-sh,gy));
-  pPrompter.style.transform = `translate(${gx}px,${gy}px) scale(${gz})`;
-  pPrompter.style.transformOrigin = '0 0';
-  pPrompter.style.width  = (100/gz)+'%';
-  pPrompter.style.height = (100/gz)+'%';
-}
-
-pWrap2.addEventListener('touchstart', e => {
-  e.preventDefault();
-  if (e.touches.length === 2) {
-    pTouch.pinching=true; pTouch.dragging=false;
-    pTouch.d0=ptDist(e.touches); pTouch.z0=gz;
-    pTouch.px0=gx; pTouch.py0=gy;
-    const m=ptMid(e.touches), r=pWrap2.getBoundingClientRect();
-    pTouch.mx=m.x-r.left; pTouch.my=m.y-r.top;
-  } else if (e.touches.length===1) {
-    pTouch.dragging=true; pTouch.pinching=false;
-    pTouch.x0=e.touches[0].clientY; pTouch.sx0=pPrompter.scrollTop;
-    pTouch.px0=gx; pTouch.py0=gy;
-  }
-}, {passive:false});
-
-pWrap2.addEventListener('touchmove', e => {
-  e.preventDefault();
-  if (pTouch.pinching && e.touches.length===2) {
-    const d=ptDist(e.touches), m=ptMid(e.touches), r=pWrap2.getBoundingClientRect();
-    const mx=m.x-r.left, my=m.y-r.top;
-    const nz=Math.min(5,Math.max(0.5,pTouch.z0*(d/pTouch.d0)));
-    const scale=nz/pTouch.z0;
-    gx = mx - scale*(pTouch.mx - pTouch.px0) - scale*pTouch.mx + pTouch.mx + pTouch.px0*(scale-1);
-    gy = my - scale*(pTouch.my - pTouch.py0) - scale*pTouch.my + pTouch.my + pTouch.py0*(scale-1);
-    gz=nz; applyGZ(); updatePosBar2();
-  } else if (pTouch.dragging && e.touches.length===1) {
-    if (gz<=1.02) {
-      pPrompter.scrollTop = pTouch.sx0 + (pTouch.x0 - e.touches[0].clientY);
-    } else {
-      gy = pTouch.py0 + (e.touches[0].clientY - pTouch.x0);
-      applyGZ();
-    }
-    updatePosBar2();
-  }
-}, {passive:false});
-
-pWrap2.addEventListener('touchend', e => {
-  if(e.touches.length<2) pTouch.pinching=false;
-  if(e.touches.length===0) pTouch.dragging=false;
-}, {passive:true});
-
-// 초기 프롬프터 콘텐츠 세팅
-syncPrompterContent();
 </script>
 </body>
 </html>
