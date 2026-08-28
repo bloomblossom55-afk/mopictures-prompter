@@ -511,7 +511,11 @@ const scriptPanel   = document.getElementById('scriptPanel');
 const resizeHandle  = document.getElementById('resizeHandle');
 
 
-// ── INIT ──
+// ── INIT: localStorage에서 스크립트 복원 ──
+(function() {
+  const saved = localStorage.getItem('mo_script');
+  if (saved) state.text = saved;
+})();
 scriptInput.value = state.text;
 renderPrompter();
 applyStyles();
@@ -677,6 +681,7 @@ boldBtn.addEventListener('click', () => {
 
 scriptInput.addEventListener('input', () => {
   state.text = scriptInput.value;
+  localStorage.setItem('mo_script', state.text);
   prompterContent.innerHTML = escapeAndMark(state.text);
   // 커서 위치 비율로 프롬프터 스크롤 이동
   const cursorPos = scriptInput.selectionStart || 0;
@@ -961,6 +966,7 @@ fileInput.addEventListener('change', async () => {
 
     state.text = text.trim();
     scriptInput.value = state.text;
+    localStorage.setItem('mo_script', state.text);
     renderPrompter(0);
     uploadStatus.textContent = '✓ ' + file.name;
     setTimeout(() => { uploadStatus.textContent = ''; }, 3000);
